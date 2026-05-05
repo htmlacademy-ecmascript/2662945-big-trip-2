@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Яна Сереброва](https://up.htmlacademy.ru/ecmascript-individual/2/user/2662945).
-* Наставник: `Неизвестно`.
+* Наставник: [Станислав Михайлов](https://htmlacademy.ru/profile/id139638).
 
 ---
 
