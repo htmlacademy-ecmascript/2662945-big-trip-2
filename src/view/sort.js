@@ -1,4 +1,4 @@
-import { createElement } from '../framework/render.js';
+import { createElement } from "../framework/render.js";
 
 export default class ViewSort {
   getTemplate() {
@@ -31,7 +31,6 @@ export default class ViewSort {
     if (!this.element) {
       this.element = createElement(this.getTemplate());
     }
-
     return this.element;
   }
 
