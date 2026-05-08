@@ -1,4 +1,4 @@
-import { createElement } from "../framework/render.js";
+import { createElement } from '../framework/render.js';
 
 export default class ViewCreatePoint {
   getTemplate() {
@@ -22,6 +22,7 @@ export default class ViewCreatePoint {
     }
     return this.element;
   }
+
   removeElement() {
     this.element = null;
   }

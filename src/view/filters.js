@@ -1,4 +1,4 @@
-import { createElement } from "../framework/render.js";
+import { createElement } from '../framework/render.js';
 
 export default class ViewFilters {
   getTemplate() {

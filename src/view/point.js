@@ -1,4 +1,4 @@
-import { createElement } from "../framework/render.js";
+import { createElement } from '../framework/render.js';
 
 export default class ViewPoint {
   constructor(eventNumber = 1) {
@@ -40,6 +40,7 @@ export default class ViewPoint {
     }
     return this.element;
   }
+
   removeElement() {
     this.element = null;
   }
