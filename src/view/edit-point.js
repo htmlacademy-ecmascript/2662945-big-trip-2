@@ -1,5 +1,4 @@
-import { createElement } from '../framework/render.js';
-
+import { createElement } from '../render.js';
 export default class ViewEditPoint {
   getTemplate() {
     return `

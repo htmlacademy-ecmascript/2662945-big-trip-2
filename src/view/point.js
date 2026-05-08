@@ -1,4 +1,4 @@
-import { createElement } from '../framework/render.js';
+import { createElement } from '../render.js';
 
 export default class ViewPoint {
   constructor(eventNumber = 1) {

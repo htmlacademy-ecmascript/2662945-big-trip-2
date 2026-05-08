@@ -1,4 +1,4 @@
-import { render, RenderPosition } from '../framework/render.js';
+import { render, RenderPosition } from '../render.js';
 import ViewFilters from '../view/filters.js';
 import ViewSort from '../view/sort.js';
 import ViewCreatePoint from '../view/create-point.js';
