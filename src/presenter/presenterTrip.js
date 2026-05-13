@@ -1,7 +1,6 @@
 import { render, RenderPosition } from '../render.js';
 import ViewFilters from '../view/filters.js';
 import ViewSort from '../view/sort.js';
-import ViewCreatePoint from '../view/create-point.js';
 import ViewEditPoint from '../view/edit-point.js';
 import ViewPoint from '../view/point.js';
 
@@ -34,12 +33,6 @@ export default class TripPresenter {
         RenderPosition.BEFOREEND,
       );
     }
-    /*
-    render(
-      new ViewCreatePoint(),
-      this.eventsContainer,
-      RenderPosition.BEFOREEND,
-    );*/
 
   }
 }
