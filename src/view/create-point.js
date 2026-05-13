@@ -3,6 +3,7 @@ import { createElement } from '../render.js';
 export default class ViewCreatePoint {
   getTemplate() {
     return `
+    <ul class="trip-events_list">
       <li class="trip-events__item">
         <form class="event event--edit" action="#" method="post">
           <header class="event__header">
@@ -164,7 +165,9 @@ export default class ViewCreatePoint {
             </section>
           </section>
         </form>
-      </li>`;
+      </li>
+      </ul>
+      `;
   }
 
   getElement() {

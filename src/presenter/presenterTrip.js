@@ -5,32 +5,33 @@ import ViewEditPoint from '../view/edit-point.js';
 import ViewPoint from '../view/point.js';
 
 export default class TripPresenter {
-  constructor({ filtersContainer, sortContainer, eventsContainer }) {
+  constructor({ filtersContainer, eventsContainer }) {
     this.filtersContainer = filtersContainer;
-    this.sortContainer = sortContainer;
     this.eventsContainer = eventsContainer;
   }
 
   init() {
+    const pointEditor = new ViewEditPoint();
     render(
       new ViewFilters(),
       this.filtersContainer,
     );
     render(
       new ViewSort(),
-      this.sortContainer,
-    );
-    render(
-      new ViewEditPoint(),
       this.eventsContainer,
       RenderPosition.AFTERBEGIN,
+    );
+    render(
+      pointEditor,
+      this.eventsContainer,
+      RenderPosition.BEFOREEND,
     );
 
     for (let i = 0; i < 3; i++) {
       render(
         new ViewPoint(i),
-        this.eventsContainer,
-        RenderPosition.BEFOREEND,
+        pointEditor.getElement(),
+        RenderPosition.BEFOREENDEND,
       );
     }
 
