@@ -13,9 +13,14 @@ export default class TripPresenter {
   }
 
   init() {
-    render(new ViewFilters(), this.filtersContainer);
-    render(new ViewSort(), this.sortContainer);
-    render(new ViewCreatePoint(), this.sortContainer, RenderPosition.AFTEREND);
+    render(
+      new ViewFilters(),
+      this.filtersContainer,
+    );
+    render(
+      new ViewSort(),
+      this.sortContainer,
+    );
     render(
       new ViewEditPoint(),
       this.eventsContainer,
@@ -23,7 +28,18 @@ export default class TripPresenter {
     );
 
     for (let i = 0; i < 3; i++) {
-      render(new ViewPoint(i), this.eventsContainer);
+      render(
+        new ViewPoint(i),
+        this.eventsContainer,
+        RenderPosition.BEFOREEND,
+      );
     }
+    /*
+    render(
+      new ViewCreatePoint(),
+      this.eventsContainer,
+      RenderPosition.BEFOREEND,
+    );*/
+
   }
 }
