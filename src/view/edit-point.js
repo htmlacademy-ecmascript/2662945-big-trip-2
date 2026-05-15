@@ -88,9 +88,7 @@ export default class ViewEditPoint {
           <p class="event__destination-description">${destinationData.description}</p>
           <div class="event__photos-container">
             <div class="event__photos-tape">
-              ${destinationData.pictures
-                .map((pic) => `<img class="event__photo" src="${pic.src}" alt="${pic.description}">`)
-                .join('')}
+              ${destinationData.pictures.map((pic) => `<img class="event__photo" src="${pic.src}" alt="${pic.description}">`).join('')}
             </div>
           </div>
         </section>

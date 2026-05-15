@@ -18,21 +18,15 @@ export default class ViewPoint {
     const offersMarkup = selectedOffers.length
       ? `
         <ul class="event__selected-offers">
-          ${selectedOffers
-            .map(
-              (offer) => `
+          ${selectedOffers.map((offer) => `
             <li class="event__offer">
               <span class="event__offer-title">${offer.title}</span>
               &plus;&euro;&nbsp;
               <span class="event__offer-price">${offer.price}</span>
             </li>
-          `
-            )
-            .join('')}
+          `).join('')}
         </ul>
-      `
-      : '';
-
+      ` : '';
     return `
       <li class="trip-events__item">
         <div class="event">
