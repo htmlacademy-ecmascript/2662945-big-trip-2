@@ -1,4 +1,5 @@
-import { getRandomNumber, getRandomArrayElement, CITIES, DESCRIPTIONS } from '../mocks/utils.js';
+import { getRandomNumber, getRandomArrayElement } from '../utils/utils.js';
+import {CITIES, DESCRIPTIONS} from '../mocks/const.js';
 
 export const generateMockDestinations = () => ({
   id: `${Date.now()}-${getRandomNumber(1, 1000)}`,
@@ -9,5 +10,4 @@ export const generateMockDestinations = () => ({
     description: getRandomArrayElement(DESCRIPTIONS),
   })),
 });
-
 

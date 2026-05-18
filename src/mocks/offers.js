@@ -1,4 +1,5 @@
-import { getRandomArrayElement, OFFERS, PRICE } from '../mocks/utils.js';
+import { getRandomArrayElement } from '../utils/utils.js';
+import {OFFERS, PRICE} from '../mocks/const.js';
 
 export const generateMockOffer = (id) => ({
   id,
@@ -13,3 +14,4 @@ export const generateMockOffers = () => [
   generateMockOffer('seats'),
   generateMockOffer('train'),
 ];
+

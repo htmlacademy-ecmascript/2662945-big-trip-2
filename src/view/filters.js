@@ -40,3 +40,4 @@ export default class ViewFilters {
     this.element = null;
   }
 }
+

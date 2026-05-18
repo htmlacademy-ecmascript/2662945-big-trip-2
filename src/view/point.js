@@ -1,4 +1,5 @@
 import { createElement } from '../render.js';
+import { humanizeEventDate, humanizeEventTime, getEventDuration } from '../utils/point.js';
 
 export default class ViewPoint {
   constructor(point, destinations, offers) {
@@ -8,7 +9,7 @@ export default class ViewPoint {
   }
 
   getTemplate() {
-    const { type, destination, basePrice, isFavorite, offers } = this.point;
+    const { type, destination, basePrice, isFavorite, offers, dateFrom, dateTo } = this.point;
 
     const destinationData = this.destinations.find((dest) => dest.id === destination);
     const title = `${type.charAt(0).toUpperCase() + type.slice(1)} ${destinationData ? destinationData.name : ''}`;
@@ -26,22 +27,24 @@ export default class ViewPoint {
             </li>
           `).join('')}
         </ul>
-      ` : '';
+      `
+      : '';
+
     return `
       <li class="trip-events__item">
         <div class="event">
-          <time class="event__date" datetime="2019-03-18">MAR 18</time>
+          <time class="event__date" datetime="${dateFrom}">${humanizeEventDate(dateFrom)}</time>
           <div class="event__type">
             <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
           </div>
           <h3 class="event__title">${title}</h3>
           <div class="event__schedule">
             <p class="event__time">
-              <time class="event__start-time" datetime="2019-03-18T10:30">10:30</time>
+              <time class="event__start-time" datetime="${dateFrom}">${humanizeEventTime(dateFrom)}</time>
               &mdash;
-              <time class="event__end-time" datetime="2019-03-18T11:00">11:00</time>
+              <time class="event__end-time" datetime="${dateTo}">${humanizeEventTime(dateTo)}</time>
             </p>
-            <p class="event__duration">30M</p>
+            <p class="event__duration">${getEventDuration(dateFrom, dateTo)}</p>
           </div>
           <p class="event__price">
             &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
@@ -73,3 +76,5 @@ export default class ViewPoint {
     this.element = null;
   }
 }
+
+

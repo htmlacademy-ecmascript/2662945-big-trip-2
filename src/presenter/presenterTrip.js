@@ -3,6 +3,7 @@ import { render, RenderPosition } from '../render.js';
 import ViewFilters from '../view/filters.js';
 import ViewSort from '../view/sort.js';
 import ViewEditPoint from '../view/edit-point.js';
+import ViewPointList from '../view/point-list.js';
 import ViewPoint from '../view/point.js';
 
 export default class TripPresenter {
@@ -18,8 +19,12 @@ export default class TripPresenter {
     const offers = this.tripModel.offers;
 
     render(new ViewFilters(), this.filtersContainer);
-
     render(new ViewSort(), this.eventsContainer, RenderPosition.AFTERBEGIN);
+
+    const pointListView = new ViewPointList();
+    render(pointListView, this.eventsContainer, RenderPosition.BEFOREEND);
+
+    const pointListElement = pointListView.getElement();
 
     const editPointView = new ViewEditPoint({
       point: points[0],
@@ -28,14 +33,15 @@ export default class TripPresenter {
       isCreating: false,
     });
 
-    render(editPointView, this.eventsContainer, RenderPosition.BEFOREEND);
+    render(editPointView, pointListElement, RenderPosition.BEFOREEND);
 
     points.forEach((point) => {
       render(
         new ViewPoint(point, destinations, offers),
-        this.eventsContainer,
+        pointListElement,
         RenderPosition.BEFOREEND,
       );
     });
   }
 }
+

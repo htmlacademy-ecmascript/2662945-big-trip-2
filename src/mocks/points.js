@@ -1,4 +1,5 @@
-import { getRandomNumber, PRICE, getDate } from '../mocks/utils.js';
+import { getRandomNumber, getDate } from '../utils/utils.js';
+import {PRICE} from '../mocks/const.js';
 
 export const generateMockPoints = (type, destinationId, offerIds) => ({
   id: `${Date.now()}-${getRandomNumber(1, 1000)}`,
@@ -10,3 +11,4 @@ export const generateMockPoints = (type, destinationId, offerIds) => ({
   offers: offerIds,
   type,
 });
+

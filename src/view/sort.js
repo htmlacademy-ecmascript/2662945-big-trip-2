@@ -39,3 +39,4 @@ export default class ViewSort {
     this.element = null;
   }
 }
+

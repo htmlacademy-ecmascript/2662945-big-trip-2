@@ -13,3 +13,4 @@ const presenter = new TripPresenter({
 });
 
 presenter.init();
+
