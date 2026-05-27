@@ -1,7 +1,7 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
-export default class ViewCreatePoint {
-  getTemplate() {
+export default class ViewCreatePoint extends AbstractView {
+  get template() {
     return `
       <li class="trip-events__item">
         <form class="event event--edit" action="#" method="post">
@@ -165,18 +165,6 @@ export default class ViewCreatePoint {
           </section>
         </form>
       </li>
-      `;
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+    `;
   }
 }
-

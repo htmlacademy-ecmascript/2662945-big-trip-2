@@ -1,20 +1,8 @@
-export default class ViewPointList {
-  getTemplate() {
+import AbstractView from '../framework/view/abstract-view.js';
+
+export default class ViewPointList extends AbstractView {
+  get template() {
     return '<ul class="trip-events__list"></ul>';
-  }
-
-  getElement() {
-    if (!this.element) {
-      const element = document.createElement('div');
-      element.innerHTML = this.getTemplate();
-      this.element = element.firstElementChild;
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }
 

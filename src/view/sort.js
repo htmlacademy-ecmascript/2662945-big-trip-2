@@ -1,9 +1,9 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
-export default class ViewSort {
-  getTemplate() {
+export default class ViewSort extends AbstractView {
+  get template() {
     return `
-    <form class="trip-events__trip-sort trip-sort" action="#" method="get">
+      <form class="trip-events__trip-sort trip-sort" action="#" method="get">
         <div class="trip-sort__item trip-sort__item--day">
           <input id="sort-day" class="trip-sort__input visually-hidden" type="radio" name="trip-sort" value="sort-day" checked>
           <label class="trip-sort__btn" for="sort-day">Day</label>
@@ -25,18 +25,7 @@ export default class ViewSort {
           <label class="trip-sort__btn" for="sort-offer">Offers</label>
         </div>
       </form>
-      `;
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+    `;
   }
 }
 
