@@ -1,47 +1,46 @@
-import { render, RenderPosition } from '../render.js';
-
+import { render, RenderPosition } from '../framework/render.js';
 import ViewFilters from '../view/filters.js';
 import ViewSort from '../view/sort.js';
-import ViewEditPoint from '../view/edit-point.js';
 import ViewPointList from '../view/point-list.js';
-import ViewPoint from '../view/point.js';
+import PointPresenter from './point-presenter.js';
 
 export default class TripPresenter {
+  #filtersContainer = null;
+  #eventsContainer = null;
+  #tripModel = null;
+
   constructor({ filtersContainer, eventsContainer, tripModel }) {
-    this.filtersContainer = filtersContainer;
-    this.eventsContainer = eventsContainer;
-    this.tripModel = tripModel;
+    this.#filtersContainer = filtersContainer;
+    this.#eventsContainer = eventsContainer;
+    this.#tripModel = tripModel;
   }
 
   init() {
-    const points = this.tripModel.points;
-    const destinations = this.tripModel.destinations;
-    const offers = this.tripModel.offers;
+    const points = this.#tripModel.points;
+    const destinations = this.#tripModel.destinations;
+    const offers = this.#tripModel.offers;
 
-    render(new ViewFilters(), this.filtersContainer);
-    render(new ViewSort(), this.eventsContainer, RenderPosition.AFTERBEGIN);
+    render(new ViewFilters(), this.#filtersContainer);
 
-    const pointListView = new ViewPointList();
-    render(pointListView, this.eventsContainer, RenderPosition.BEFOREEND);
+    render(
+      new ViewSort(),
+      this.#eventsContainer,
+      RenderPosition.AFTERBEGIN
+    );
 
-    const pointListElement = pointListView.getElement();
+    const pointListComponent = new ViewPointList();
 
-    const editPointView = new ViewEditPoint({
-      point: points[0],
-      destinations,
-      offers,
-      isCreating: false,
-    });
-
-    render(editPointView, pointListElement, RenderPosition.BEFOREEND);
+    render(pointListComponent, this.#eventsContainer);
 
     points.forEach((point) => {
-      render(
-        new ViewPoint(point, destinations, offers),
-        pointListElement,
-        RenderPosition.BEFOREEND,
-      );
+      const pointPresenter = new PointPresenter({
+        container: pointListComponent.element,
+        point,
+        destinations,
+        offers,
+      });
+
+      pointPresenter.init();
     });
   }
 }
-
