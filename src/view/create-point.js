@@ -165,5 +165,6 @@ export default class ViewCreatePoint extends AbstractView {
           </section>
         </form>
       </li>
-      `;
-     }
+    `;
+  }
+}
