@@ -2,6 +2,7 @@ import { render, RenderPosition } from '../framework/render.js';
 import ViewFilters from '../view/filters.js';
 import ViewSort from '../view/sort.js';
 import ViewPointList from '../view/point-list.js';
+import ViewEmptyPointList from '../view/empty-point-list.js';
 import PointPresenter from './point-presenter.js';
 
 export default class TripPresenter {
@@ -21,6 +22,11 @@ export default class TripPresenter {
     const offers = this.#tripModel.offers;
 
     render(new ViewFilters(), this.#filtersContainer);
+
+    if (points.length === 0) {
+      render(new ViewEmptyPointList(), this.#eventsContainer);
+      return;
+    }
 
     render(
       new ViewSort(),
