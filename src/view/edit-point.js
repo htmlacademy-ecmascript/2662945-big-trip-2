@@ -130,11 +130,8 @@ export default class ViewEditPoint extends AbstractView {
     return `
       <li class="trip-events__item">
         <form class="event event--edit" action="#" method="post">
-
           <header class="event__header">
-
             <div class="event__type-wrapper">
-
               <label
                 class="event__type event__type-btn"
                 for="event-type-toggle-1"
@@ -165,13 +162,11 @@ export default class ViewEditPoint extends AbstractView {
                   </legend>
 
                   ${typeItems}
-
                 </fieldset>
               </div>
             </div>
 
             <div class="event__field-group event__field-group--destination">
-
               <label
                 class="event__label event__type-output"
                 for="event-destination-1"
@@ -191,53 +186,42 @@ export default class ViewEditPoint extends AbstractView {
               <datalist id="destination-list-1">
                 ${destinationsOptions}
               </datalist>
-
             </div>
 
             <div class="event__field-group event__field-group--time">
-
-              <label class="visually-hidden">
-                From
-              </label>
-
+              <label class="visually-hidden" for="event-start-time-1">From</label>
               <input
                 class="event__input event__input--time"
+                id="event-start-time-1"
                 type="text"
+                name="event-start-time"
                 value="${dateFrom ? humanizeEditEventDate(dateFrom) : ''}"
               >
-
               &mdash;
-
-              <label class="visually-hidden">
-                To
-              </label>
-
+              <label class="visually-hidden" for="event-end-time-1">To</label>
               <input
                 class="event__input event__input--time"
+                id="event-end-time-1"
                 type="text"
+                name="event-end-time"
                 value="${dateTo ? humanizeEditEventDate(dateTo) : ''}"
               >
-
             </div>
 
             <div class="event__field-group event__field-group--price">
-
-              <label class="event__label">
+              <label class="event__label" for="event-price-1">
                 &euro;
               </label>
-
               <input
                 class="event__input event__input--price"
+                id="event-price-1"
                 type="text"
+                name="event-price"
                 value="${basePrice}"
               >
-
             </div>
 
-            <button
-              class="event__save-btn btn btn--blue"
-              type="submit"
-            >
+            <button class="event__save-btn btn btn--blue" type="submit">
               Save
             </button>
 
@@ -256,14 +240,12 @@ export default class ViewEditPoint extends AbstractView {
                 Open event
               </span>
             </button>
-
           </header>
 
           <section class="event__details">
             ${offersSection}
             ${destinationSection}
           </section>
-
         </form>
       </li>
     `;

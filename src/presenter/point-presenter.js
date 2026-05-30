@@ -30,13 +30,11 @@ export default class PointPresenter {
 
     this.#pointComponent.setEditClickHandler(() => {
       replace(this.#editPointComponent, this.#pointComponent);
-
       document.addEventListener('keydown', this.#escKeyDownHandler);
     });
 
     this.#editPointComponent.setFormSubmitHandler((evt) => {
       evt.preventDefault();
-
       this.#replaceFormToPoint();
     });
 
@@ -51,14 +49,12 @@ export default class PointPresenter {
 
   #replaceFormToPoint() {
     replace(this.#pointComponent, this.#editPointComponent);
-
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-
       this.#replaceFormToPoint();
     }
   };
