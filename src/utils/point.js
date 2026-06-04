@@ -4,12 +4,12 @@ const DATE_FORMAT = 'MMM DD';
 const TIME_FORMAT = 'HH:mm';
 const FORM_DATE_FORMAT = 'DD/MM/YY HH:mm';
 
+const MINUTES_IN_HOUR = 60;
+const MINUTES_IN_DAY = 1440;
+
 const humanizeEventDate = (date) => dayjs(date).format(DATE_FORMAT).toUpperCase();
 const humanizeEventTime = (date) => dayjs(date).format(TIME_FORMAT);
 const humanizeEditEventDate = (date) => dayjs(date).format(FORM_DATE_FORMAT);
-
-const MINUTES_IN_HOUR = 60;
-const MINUTES_IN_DAY = 1440;
 
 const getEventDuration = (dateFrom, dateTo) => {
   const durationInMinutes = dayjs(dateTo).diff(dayjs(dateFrom), 'minute');
