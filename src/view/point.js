@@ -29,13 +29,10 @@ export default class ViewPoint extends AbstractView {
       dateTo
     } = this.#point;
 
-    const destinationData =
-      this.#destinations.find((dest) => dest.id === destination);
-
+    const destinationData = this.#destinations.find((dest) => dest.id === destination);
     const destinationName = destinationData ? destinationData.name : '';
 
-    const selectedOffers =
-      this.#offers.filter((offer) => offers.includes(offer.id));
+    const selectedOffers = this.#offers.filter((offer) => offers.includes(offer.id));
 
     const offersMarkup = selectedOffers.map((offer) => `
       <li class="event__offer">
@@ -92,28 +89,24 @@ export default class ViewPoint extends AbstractView {
             ${offersMarkup}
           </ul>
 
-         <button
-  class="event__favorite-btn ${isFavorite ? 'event__favorite-btn--active' : ''}"
-  type="button"
->
-  <span class="visually-hidden">Add to favorite</span>
-
-  <svg
-    class="event__favorite-icon"
-    width="28"
-    height="28"
-    viewBox="0 0 28 28"
-  >
-    <path
-      d="M14 21l-7.053 3.708 1.347-7.854L2.588 11.292l7.886-1.146L14 3l3.526 7.146 7.886 1.146-5.706 5.562 1.347 7.854z"
-    />
-  </svg>
-</button>
-
           <button
-            class="event__rollup-btn"
+            class="event__favorite-btn ${isFavorite ? 'event__favorite-btn--active' : ''}"
             type="button"
           >
+            <span class="visually-hidden">Add to favorite</span>
+            <svg
+              class="event__favorite-icon"
+              width="28"
+              height="28"
+              viewBox="0 0 28 28"
+            >
+              <path
+                d="M14 21l-7.053 3.708 1.347-7.854L2.588 11.292l7.886-1.146L14 3l3.526 7.146 7.886 1.146-5.706 5.562 1.347 7.854z"
+              />
+            </svg>
+          </button>
+
+          <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
           </button>
         </div>
@@ -125,5 +118,14 @@ export default class ViewPoint extends AbstractView {
     this.element
       .querySelector('.event__rollup-btn')
       .addEventListener('click', callback);
+  }
+
+  setFavoriteClickHandler(callback) {
+    this.element
+      .querySelector('.event__favorite-btn')
+      .addEventListener('click', (evt) => {
+        evt.preventDefault();
+        callback();
+      });
   }
 }

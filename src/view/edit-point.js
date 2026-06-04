@@ -1,3 +1,4 @@
+
 import AbstractView from '../framework/view/abstract-view.js';
 import { TYPES } from '../mocks/const.js';
 import { humanizeEditEventDate } from '../utils/point.js';
@@ -10,16 +11,7 @@ export default class ViewEditPoint extends AbstractView {
 
   constructor({ point, destinations, offers, isCreating = false }) {
     super();
-
-    this.#point = point || {
-      type: 'flight',
-      destination: null,
-      basePrice: 0,
-      dateFrom: '',
-      dateTo: '',
-      offers: [],
-    };
-
+    this.#point = point;
     this.#destinations = destinations;
     this.#offers = offers;
     this.#isCreating = isCreating;
@@ -27,16 +19,15 @@ export default class ViewEditPoint extends AbstractView {
 
   get template() {
     const {
-      type = 'flight',
+      type,
       destination,
       basePrice,
       dateFrom,
       dateTo,
-      offers: selectedOfferIds = [],
+      offers: selectedOfferIds
     } = this.#point;
 
-    const destinationData =
-      this.#destinations.find((dest) => dest.id === destination);
+    const destinationData = this.#destinations.find((dest) => dest.id === destination);
 
     const typeItems = TYPES.map((item) => {
       const value = item.toLowerCase();
@@ -44,17 +35,16 @@ export default class ViewEditPoint extends AbstractView {
       return `
         <div class="event__type-item">
           <input
-            id="event-type-${value}"
+            id="event-type-${value}-1"
             class="event__type-input visually-hidden"
             type="radio"
             name="event-type"
             value="${value}"
-            ${type === value ? 'checked' : ''}
+            ${value === type ? 'checked' : ''}
           >
-
           <label
             class="event__type-label event__type-label--${value}"
-            for="event-type-${value}"
+            for="event-type-${value}-1"
           >
             ${item}
           </label>
@@ -66,15 +56,14 @@ export default class ViewEditPoint extends AbstractView {
       <div class="event__offer-selector">
         <input
           class="event__offer-checkbox visually-hidden"
-          id="event-offer-${offer.id}"
+          id="event-offer-${offer.id}-1"
           type="checkbox"
           name="event-offer-${offer.id}"
           ${selectedOfferIds.includes(offer.id) ? 'checked' : ''}
         >
-
         <label
           class="event__offer-label"
-          for="event-offer-${offer.id}"
+          for="event-offer-${offer.id}-1"
         >
           <span class="event__offer-title">${offer.title}</span>
           &plus;&euro;&nbsp;
@@ -83,17 +72,14 @@ export default class ViewEditPoint extends AbstractView {
       </div>
     `).join('');
 
-    const destinationsOptions = this.#destinations
-      .map((dest) => `<option value="${dest.name}"></option>`)
-      .join('');
+    const destinationsOptions = this.#destinations.map((dest) => `
+      <option value="${dest.name}"></option>
+    `).join('');
 
     const offersSection = offersItems
       ? `
         <section class="event__section event__section--offers">
-          <h3 class="event__section-title event__section-title--offers">
-            Offers
-          </h3>
-
+          <h3 class="event__section-title event__section-title--offers">Offers</h3>
           <div class="event__available-offers">
             ${offersItems}
           </div>
@@ -104,10 +90,7 @@ export default class ViewEditPoint extends AbstractView {
     const destinationSection = destinationData
       ? `
         <section class="event__section event__section--destination">
-          <h3 class="event__section-title event__section-title--destination">
-            Destination
-          </h3>
-
+          <h3 class="event__section-title event__section-title--destination">Destination</h3>
           <p class="event__destination-description">
             ${destinationData.description}
           </p>
@@ -136,10 +119,7 @@ export default class ViewEditPoint extends AbstractView {
                 class="event__type event__type-btn"
                 for="event-type-toggle-1"
               >
-                <span class="visually-hidden">
-                  Choose event type
-                </span>
-
+                <span class="visually-hidden">Choose event type</span>
                 <img
                   class="event__type-icon"
                   width="17"
@@ -157,10 +137,7 @@ export default class ViewEditPoint extends AbstractView {
 
               <div class="event__type-list">
                 <fieldset class="event__type-group">
-                  <legend class="visually-hidden">
-                    Event type
-                  </legend>
-
+                  <legend class="visually-hidden">Event type</legend>
                   ${typeItems}
                 </fieldset>
               </div>
@@ -210,8 +187,10 @@ export default class ViewEditPoint extends AbstractView {
 
             <div class="event__field-group event__field-group--price">
               <label class="event__label" for="event-price-1">
-                &euro;
+                <span class="visually-hidden">Price</span>
+                €
               </label>
+
               <input
                 class="event__input event__input--price"
                 id="event-price-1"
@@ -221,24 +200,12 @@ export default class ViewEditPoint extends AbstractView {
               >
             </div>
 
-            <button class="event__save-btn btn btn--blue" type="submit">
-              Save
-            </button>
-
-            <button
-              class="event__reset-btn"
-              type="reset"
-            >
+            <button class="event__save-btn btn btn--blue" type="submit">Save</button>
+            <button class="event__reset-btn" type="reset">
               ${this.#isCreating ? 'Cancel' : 'Delete'}
             </button>
-
-            <button
-              class="event__rollup-btn"
-              type="button"
-            >
-              <span class="visually-hidden">
-                Open event
-              </span>
+            <button class="event__rollup-btn" type="button">
+              <span class="visually-hidden">Open event</span>
             </button>
           </header>
 

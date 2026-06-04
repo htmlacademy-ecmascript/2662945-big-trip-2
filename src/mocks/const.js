@@ -48,3 +48,5 @@ export const DURATION = {
   hour: 2,
   min: 20,
 };
+
+export const POINTS_COUNT = 3;

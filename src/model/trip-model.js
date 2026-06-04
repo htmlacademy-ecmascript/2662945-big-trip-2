@@ -2,13 +2,11 @@ import { generateMockPoints } from '../mocks/points.js';
 import { generateMockDestinations } from '../mocks/destination.js';
 import { generateMockOffers } from '../mocks/offers.js';
 import { getRandomArrayElement } from '../utils/utils.js';
-import { TYPES } from '../mocks/const.js';
-
-const POINTS_COUNT = 3;
+import { TYPES, POINTS_COUNT } from '../mocks/const.js';
 
 export default class TripModel {
   constructor() {
-    this.destinationsData = Array.from({ length: 3 }, () => generateMockDestinations());
+    this.destinationsData = Array.from({ length: POINTS_COUNT }, () => generateMockDestinations());
     this.offersData = generateMockOffers();
 
     this.pointsData = Array.from({ length: POINTS_COUNT }, () => {
