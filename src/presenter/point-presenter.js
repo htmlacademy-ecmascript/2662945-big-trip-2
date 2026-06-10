@@ -1,4 +1,4 @@
-import { render, replace } from '../framework/render.js';
+import { render, replace, remove } from '../framework/render.js';
 import ViewPoint from '../view/point.js';
 import ViewEditPoint from '../view/edit-point.js';
 
@@ -49,6 +49,12 @@ export default class PointPresenter {
     this.#editPointComponent.setDeleteClickHandler(this.#handleDeleteClick);
 
     render(this.#pointComponent, this.#container);
+  }
+
+  destroy() {
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+    remove(this.#pointComponent);
+    remove(this.#editPointComponent);
   }
 
   update(point) {
