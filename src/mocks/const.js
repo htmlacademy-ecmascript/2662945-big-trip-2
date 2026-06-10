@@ -50,3 +50,9 @@ export const DURATION = {
 };
 
 export const POINTS_COUNT = 3;
+
+export const SortType = {
+  DAY: 'sort-day',
+  TIME: 'sort-time',
+  PRICE: 'sort-price',
+};

@@ -1,4 +1,3 @@
-
 import AbstractView from '../framework/view/abstract-view.js';
 import { TYPES } from '../mocks/const.js';
 import { humanizeEditEventDate } from '../utils/point.js';
@@ -27,6 +26,7 @@ export default class ViewEditPoint extends AbstractView {
       offers: selectedOfferIds
     } = this.#point;
 
+    const pointId = this.#point.id;
     const destinationData = this.#destinations.find((dest) => dest.id === destination);
 
     const typeItems = TYPES.map((item) => {
@@ -35,7 +35,7 @@ export default class ViewEditPoint extends AbstractView {
       return `
         <div class="event__type-item">
           <input
-            id="event-type-${value}-1"
+            id="event-type-${value}-${pointId}"
             class="event__type-input visually-hidden"
             type="radio"
             name="event-type"
@@ -44,7 +44,7 @@ export default class ViewEditPoint extends AbstractView {
           >
           <label
             class="event__type-label event__type-label--${value}"
-            for="event-type-${value}-1"
+            for="event-type-${value}-${pointId}"
           >
             ${item}
           </label>
@@ -56,14 +56,14 @@ export default class ViewEditPoint extends AbstractView {
       <div class="event__offer-selector">
         <input
           class="event__offer-checkbox visually-hidden"
-          id="event-offer-${offer.id}-1"
+          id="event-offer-${offer.id}-${pointId}"
           type="checkbox"
           name="event-offer-${offer.id}"
           ${selectedOfferIds.includes(offer.id) ? 'checked' : ''}
         >
         <label
           class="event__offer-label"
-          for="event-offer-${offer.id}-1"
+          for="event-offer-${offer.id}-${pointId}"
         >
           <span class="event__offer-title">${offer.title}</span>
           &plus;&euro;&nbsp;
@@ -117,7 +117,7 @@ export default class ViewEditPoint extends AbstractView {
             <div class="event__type-wrapper">
               <label
                 class="event__type event__type-btn"
-                for="event-type-toggle-1"
+                for="event-type-toggle-${pointId}"
               >
                 <span class="visually-hidden">Choose event type</span>
                 <img
@@ -131,7 +131,7 @@ export default class ViewEditPoint extends AbstractView {
 
               <input
                 class="event__type-toggle visually-hidden"
-                id="event-type-toggle-1"
+                id="event-type-toggle-${pointId}"
                 type="checkbox"
               >
 
@@ -146,39 +146,39 @@ export default class ViewEditPoint extends AbstractView {
             <div class="event__field-group event__field-group--destination">
               <label
                 class="event__label event__type-output"
-                for="event-destination-1"
+                for="event-destination-${pointId}"
               >
                 ${type}
               </label>
 
               <input
                 class="event__input event__input--destination"
-                id="event-destination-1"
+                id="event-destination-${pointId}"
                 type="text"
                 name="event-destination"
                 value="${destinationData ? destinationData.name : ''}"
-                list="destination-list-1"
+                list="destination-list-${pointId}"
               >
 
-              <datalist id="destination-list-1">
+              <datalist id="destination-list-${pointId}">
                 ${destinationsOptions}
               </datalist>
             </div>
 
             <div class="event__field-group event__field-group--time">
-              <label class="visually-hidden" for="event-start-time-1">From</label>
+              <label class="visually-hidden" for="event-start-time-${pointId}">From</label>
               <input
                 class="event__input event__input--time"
-                id="event-start-time-1"
+                id="event-start-time-${pointId}"
                 type="text"
                 name="event-start-time"
                 value="${dateFrom ? humanizeEditEventDate(dateFrom) : ''}"
               >
               &mdash;
-              <label class="visually-hidden" for="event-end-time-1">To</label>
+              <label class="visually-hidden" for="event-end-time-${pointId}">To</label>
               <input
                 class="event__input event__input--time"
-                id="event-end-time-1"
+                id="event-end-time-${pointId}"
                 type="text"
                 name="event-end-time"
                 value="${dateTo ? humanizeEditEventDate(dateTo) : ''}"
@@ -186,14 +186,14 @@ export default class ViewEditPoint extends AbstractView {
             </div>
 
             <div class="event__field-group event__field-group--price">
-              <label class="event__label" for="event-price-1">
+              <label class="event__label" for="event-price-${pointId}">
                 <span class="visually-hidden">Price</span>
                 €
               </label>
 
               <input
                 class="event__input event__input--price"
-                id="event-price-1"
+                id="event-price-${pointId}"
                 type="text"
                 name="event-price"
                 value="${basePrice}"
