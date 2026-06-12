@@ -1,33 +1,43 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { TYPES } from '../mocks/const.js';
 import { humanizeEditEventDate } from '../utils/point.js';
 
-export default class ViewEditPoint extends AbstractView {
-  #point = null;
-  #destinations = null;
-  #offers = null;
-  #isCreating = false;
+export default class ViewEditPoint extends AbstractStatefulView {
+  #onFormSubmit = null;
+  #onRollupClick = null;
+  #onDeleteClick = null;
 
   constructor({ point, destinations, offers, isCreating = false }) {
     super();
-    this.#point = point;
-    this.#destinations = destinations;
-    this.#offers = offers;
-    this.#isCreating = isCreating;
+
+    this._state = {
+      point: structuredClone(point),
+      destinations: structuredClone(destinations),
+      offers: structuredClone(offers),
+      isCreating,
+    };
+
+    this._restoreHandlers();
   }
 
   get template() {
+    const { point, destinations, offers, isCreating } = this._state;
+
     const {
       type,
       destination,
       basePrice,
       dateFrom,
       dateTo,
-      offers: selectedOfferIds
-    } = this.#point;
+      offers: selectedOfferIds,
+    } = point;
+    const offersByType =
+  offers.find((offer) => offer.type === type);
+    const availableOffers =
+  offersByType ? offersByType.offers : [];
 
-    const pointId = this.#point.id;
-    const destinationData = this.#destinations.find((dest) => dest.id === destination);
+    const pointId = point.id;
+    const destinationData = destinations.find((dest) => dest.id === destination);
 
     const typeItems = TYPES.map((item) => {
       const value = item.toLowerCase();
@@ -52,27 +62,28 @@ export default class ViewEditPoint extends AbstractView {
       `;
     }).join('');
 
-    const offersItems = this.#offers.map((offer) => `
-      <div class="event__offer-selector">
-        <input
-          class="event__offer-checkbox visually-hidden"
-          id="event-offer-${offer.id}-${pointId}"
-          type="checkbox"
-          name="event-offer-${offer.id}"
-          ${selectedOfferIds.includes(offer.id) ? 'checked' : ''}
-        >
-        <label
-          class="event__offer-label"
-          for="event-offer-${offer.id}-${pointId}"
-        >
-          <span class="event__offer-title">${offer.title}</span>
-          &plus;&euro;&nbsp;
-          <span class="event__offer-price">${offer.price}</span>
-        </label>
-      </div>
-    `).join('');
+    const offersItems = availableOffers.map((offer) => `
+  <div class="event__offer-selector">
+    <input
+      class="event__offer-checkbox visually-hidden"
+      id="event-offer-${offer.id}-${pointId}"
+      type="checkbox"
+      name="event-offer-${offer.id}"
+      ${selectedOfferIds.includes(offer.id) ? 'checked' : ''}
+    >
 
-    const destinationsOptions = this.#destinations.map((dest) => `
+    <label
+      class="event__offer-label"
+      for="event-offer-${offer.id}-${pointId}"
+    >
+      <span class="event__offer-title">${offer.title}</span>
+      &plus;&euro;&nbsp;
+      <span class="event__offer-price">${offer.price}</span>
+    </label>
+  </div>
+`).join('');
+
+    const destinationsOptions = destinations.map((dest) => `
       <option value="${dest.name}"></option>
     `).join('');
 
@@ -202,7 +213,7 @@ export default class ViewEditPoint extends AbstractView {
 
             <button class="event__save-btn btn btn--blue" type="submit">Save</button>
             <button class="event__reset-btn" type="reset">
-              ${this.#isCreating ? 'Cancel' : 'Delete'}
+              ${isCreating ? 'Cancel' : 'Delete'}
             </button>
             <button class="event__rollup-btn" type="button">
               <span class="visually-hidden">Open event</span>
@@ -218,24 +229,69 @@ export default class ViewEditPoint extends AbstractView {
     `;
   }
 
+  _restoreHandlers() {
+    this.setFormSubmitHandler(this.#onFormSubmit);
+    this.setRollupClickHandler(this.#onRollupClick);
+    this.setDeleteClickHandler(this.#onDeleteClick);
+
+    this.#setTypeChangeHandler();
+    this.#setDestinationChangeHandler();
+  }
+
   setFormSubmitHandler(callback) {
-    this.element
-      .querySelector('form')
-      .addEventListener('submit', callback);
+    this.#onFormSubmit = callback;
+    this.element.querySelector('form').addEventListener('submit', callback);
   }
 
   setRollupClickHandler(callback) {
-    this.element
-      .querySelector('.event__rollup-btn')
-      .addEventListener('click', callback);
+    this.#onRollupClick = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', callback);
   }
 
   setDeleteClickHandler(callback) {
-    this.element
-      .querySelector('.event__reset-btn')
-      .addEventListener('click', (evt) => {
-        evt.preventDefault();
-        callback();
+    this.#onDeleteClick = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', (evt) => {
+      evt.preventDefault();
+      callback();
+    });
+  }
+
+  #setTypeChangeHandler() {
+    this.element.querySelector('.event__type-group').addEventListener('change', (evt) => {
+      const target = evt.target;
+
+      if (!target.matches('.event__type-input')) {
+        return;
+      }
+
+      const newType = target.value;
+
+      this.updateElement({
+        point: {
+          ...this._state.point,
+          type: newType,
+          offers: [],
+        },
       });
+    });
+  }
+
+  #setDestinationChangeHandler() {
+    this.element.querySelector('.event__input--destination').addEventListener('change', (evt) => {
+      const inputValue = evt.target.value;
+      const destination = this._state.destinations.find((dest) => dest.name === inputValue);
+
+      if (!destination) {
+        return;
+      }
+
+      this.updateElement({
+        point: {
+          ...this._state.point,
+          destination: destination.id,
+        },
+      });
+    });
   }
 }
+
