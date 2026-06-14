@@ -67,7 +67,6 @@ export default class TripPresenter {
 
   #renderPointList() {
     this.#pointListComponent = new ViewPointList();
-
     render(this.#pointListComponent, this.#eventsContainer);
   }
 

@@ -1,11 +1,20 @@
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { TYPES } from '../mocks/const.js';
 import { humanizeEditEventDate } from '../utils/point.js';
+
+const DateFormat = {
+  FLATPICKR: 'd/m/y H:i',
+};
 
 export default class ViewEditPoint extends AbstractStatefulView {
   #onFormSubmit = null;
   #onRollupClick = null;
   #onDeleteClick = null;
+  #dateFromPicker = null;
+  #dateToPicker = null;
 
   constructor({ point, destinations, offers, isCreating = false }) {
     super();
@@ -31,10 +40,9 @@ export default class ViewEditPoint extends AbstractStatefulView {
       dateTo,
       offers: selectedOfferIds,
     } = point;
-    const offersByType =
-  offers.find((offer) => offer.type === type);
-    const availableOffers =
-  offersByType ? offersByType.offers : [];
+
+    const offersByType = offers.find((offer) => offer.type === type);
+    const availableOffers = offersByType ? offersByType.offers : [];
 
     const pointId = point.id;
     const destinationData = destinations.find((dest) => dest.id === destination);
@@ -63,25 +71,24 @@ export default class ViewEditPoint extends AbstractStatefulView {
     }).join('');
 
     const offersItems = availableOffers.map((offer) => `
-  <div class="event__offer-selector">
-    <input
-      class="event__offer-checkbox visually-hidden"
-      id="event-offer-${offer.id}-${pointId}"
-      type="checkbox"
-      name="event-offer-${offer.id}"
-      ${selectedOfferIds.includes(offer.id) ? 'checked' : ''}
-    >
-
-    <label
-      class="event__offer-label"
-      for="event-offer-${offer.id}-${pointId}"
-    >
-      <span class="event__offer-title">${offer.title}</span>
-      &plus;&euro;&nbsp;
-      <span class="event__offer-price">${offer.price}</span>
-    </label>
-  </div>
-`).join('');
+      <div class="event__offer-selector">
+        <input
+          class="event__offer-checkbox visually-hidden"
+          id="event-offer-${offer.id}-${pointId}"
+          type="checkbox"
+          name="event-offer-${offer.id}"
+          ${selectedOfferIds.includes(offer.id) ? 'checked' : ''}
+        >
+        <label
+          class="event__offer-label"
+          for="event-offer-${offer.id}-${pointId}"
+        >
+          <span class="event__offer-title">${offer.title}</span>
+          &plus;&euro;&nbsp;
+          <span class="event__offer-price">${offer.price}</span>
+        </label>
+      </div>
+    `).join('');
 
     const destinationsOptions = destinations.map((dest) => `
       <option value="${dest.name}"></option>
@@ -105,7 +112,6 @@ export default class ViewEditPoint extends AbstractStatefulView {
           <p class="event__destination-description">
             ${destinationData.description}
           </p>
-
           <div class="event__photos-container">
             <div class="event__photos-tape">
               ${destinationData.pictures.map((pic) => `
@@ -229,6 +235,14 @@ export default class ViewEditPoint extends AbstractStatefulView {
     `;
   }
 
+  removeElement() {
+    this.#dateFromPicker?.destroy();
+    this.#dateToPicker?.destroy();
+    this.#dateFromPicker = null;
+    this.#dateToPicker = null;
+    super.removeElement();
+  }
+
   _restoreHandlers() {
     this.setFormSubmitHandler(this.#onFormSubmit);
     this.setRollupClickHandler(this.#onRollupClick);
@@ -236,6 +250,7 @@ export default class ViewEditPoint extends AbstractStatefulView {
 
     this.#setTypeChangeHandler();
     this.#setDestinationChangeHandler();
+    this.#setDatepickers();
   }
 
   setFormSubmitHandler(callback) {
@@ -264,12 +279,10 @@ export default class ViewEditPoint extends AbstractStatefulView {
         return;
       }
 
-      const newType = target.value;
-
       this.updateElement({
         point: {
           ...this._state.point,
-          type: newType,
+          type: target.value,
           offers: [],
         },
       });
@@ -293,5 +306,38 @@ export default class ViewEditPoint extends AbstractStatefulView {
       });
     });
   }
-}
 
+  #setDatepickers() {
+    const startInput = this.element.querySelector(`#event-start-time-${this._state.point.id}`
+    );
+    const endInput = this.element.querySelector(`#event-end-time-${this._state.point.id}`
+    );
+    this.#dateFromPicker = flatpickr(startInput, {
+      dateFormat: DateFormat.FLATPICKR,
+      defaultDate: this._state.point.dateFrom,
+      enableTime: true,
+      onChange: ([userDate]) => {
+        this.updateElement({
+          point: {
+            ...this._state.point,
+            dateFrom: userDate.toISOString(),
+          },
+        });
+      },
+    });
+
+    this.#dateToPicker = flatpickr(endInput, {
+      dateFormat: DateFormat.FLATPICKR,
+      defaultDate: this._state.point.dateTo,
+      enableTime: true,
+      onChange: ([userDate]) => {
+        this.updateElement({
+          point: {
+            ...this._state.point,
+            dateTo: userDate.toISOString(),
+          },
+        });
+      },
+    });
+  }
+}

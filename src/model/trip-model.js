@@ -12,13 +12,9 @@ export default class TripModel {
     this.pointsData = Array.from({ length: POINTS_COUNT }, () => {
       const destination = getRandomArrayElement(this.destinationsData);
       const type = getRandomArrayElement(TYPES).toLowerCase();
-      const offersByType =
-  this.offersData.find((offer) => offer.type === type);
-      const allOfferIds =
-  offersByType ? offersByType.offers.map((offer) => offer.id) : [];
-      const randomOffersIds =
-  allOfferIds.filter(() => Math.random() < 0.5);
-
+      const offersByType = this.offersData.find((offer) => offer.type === type);
+      const allOfferIds = offersByType ? offersByType.offers.map((offer) => offer.id) : [];
+      const randomOffersIds = allOfferIds.filter(() => Math.random() < 0.5);
 
       return generateMockPoints(type, destination.id, randomOffersIds);
     });
