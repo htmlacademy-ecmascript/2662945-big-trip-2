@@ -31,12 +31,9 @@ export default class ViewPoint extends AbstractView {
     const destinationData = this.#destinations.find((dest) => dest.id === destination);
     const destinationName = destinationData ? destinationData.name : '';
 
-    const offersByType =
-  this.#offers.find((offer) => offer.type === type);
-    const availableOffers =
-  offersByType ? offersByType.offers : [];
-    const selectedOffers =
-  availableOffers.filter((offer) => offers.includes(offer.id));
+    const offersByType = this.#offers.find((offer) => offer.type === type);
+    const availableOffers = offersByType ? offersByType.offers : [];
+    const selectedOffers = availableOffers.filter((offer) => offers.includes(offer.id));
 
     const offersMarkup = selectedOffers.map((offer) => `
       <li class="event__offer">
