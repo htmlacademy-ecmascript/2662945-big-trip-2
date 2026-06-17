@@ -31,4 +31,22 @@ export default class TripModel {
   get offers() {
     return this.offersData;
   }
+
+  updatePoint(updatedPoint) {
+    const index = this.pointsData.findIndex((point) => point.id === updatedPoint.id);
+
+    if (index === -1) {
+      return;
+    }
+
+    this.pointsData.splice(index, 1, updatedPoint);
+  }
+
+  addPoint(point) {
+    this.pointsData.unshift(point);
+  }
+
+  deletePoint(point) {
+    this.pointsData = this.pointsData.filter((item) => item.id !== point.id);
+  }
 }
