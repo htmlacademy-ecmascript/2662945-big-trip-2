@@ -80,4 +80,3 @@ export default class ViewFilters extends AbstractView {
     this.#onFilterTypeChange?.(input.value);
   };
 }
-

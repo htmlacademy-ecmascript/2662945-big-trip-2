@@ -11,4 +11,3 @@ export const generateMockPoints = (type, destinationId, offerIds) => ({
   offers: offerIds,
   type,
 });
-

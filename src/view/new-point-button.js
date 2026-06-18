@@ -6,6 +6,8 @@ export default class ViewNewPointButton extends AbstractView {
   constructor({ onClick }) {
     super();
     this.#onClick = onClick;
+
+    this.element.addEventListener('click', this.#handleClick);
   }
 
   get template() {
@@ -16,9 +18,9 @@ export default class ViewNewPointButton extends AbstractView {
     `;
   }
 
-  get element() {
-    const element = super.element;
-    element.addEventListener('click', this.#onClick);
-    return element;
-  }
+  #handleClick = (evt) => {
+    evt.preventDefault();
+    console.log('BUTTON CLICKED');
+    this.#onClick?.();
+  };
 }

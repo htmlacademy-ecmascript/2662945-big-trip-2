@@ -1,3 +1,4 @@
+
 import { render, remove, RenderPosition } from '../framework/render.js';
 import ViewSort from '../view/sort.js';
 import { SortType, FilterType } from '../mocks/const.js';
@@ -9,6 +10,7 @@ import {
 import ViewPointList from '../view/point-list.js';
 import ViewEmptyPointListFilter from '../view/empty-point-list-filter.js';
 import PointPresenter from './point-presenter.js';
+import ViewEditPoint from '../view/edit-point.js';
 
 export default class TripPresenter {
   #eventsContainer = null;
@@ -23,6 +25,15 @@ export default class TripPresenter {
   #currentSortType = SortType.DAY;
   #isCreatingNewPoint = false;
 
+  #escKeyDownHandler = (evt) => {
+    if (evt.key === 'Escape' && this.#newPointEditComponent) {
+      remove(this.#newPointEditComponent);
+      this.#newPointEditComponent = null;
+
+      document.removeEventListener('keydown', this.#escKeyDownHandler);
+    }
+  };
+
   constructor({ eventsContainer, tripModel, filterModel }) {
     this.#eventsContainer = eventsContainer;
     this.#tripModel = tripModel;
@@ -32,6 +43,64 @@ export default class TripPresenter {
   init() {
     this.rerender();
   }
+
+  createPoint() {
+    if (this.#newPointEditComponent) {
+      return;
+    }
+
+    this.#handleModeChange();
+
+    const destination = this.#tripModel.destinations[0];
+
+    this.#newPointEditComponent = new ViewEditPoint({
+      point: {
+        id: 'new-point',
+        type: 'flight',
+        destination: destination.id,
+        basePrice: 0,
+        dateFrom: new Date(),
+        dateTo: new Date(),
+        offers: [],
+        isFavorite: false,
+      },
+      destinations: this.#tripModel.destinations,
+      offers: this.#tripModel.offers,
+      isCreating: true,
+    });
+    document.addEventListener('keydown', this.#escKeyDownHandler);
+
+    this.#newPointEditComponent.setRollupClickHandler(() => {
+      remove(this.#newPointEditComponent);
+      this.#newPointEditComponent = null;
+
+      document.removeEventListener('keydown', this.#escKeyDownHandler);
+    });
+
+    this.#newPointEditComponent.setDeleteClickHandler(() => {
+      remove(this.#newPointEditComponent);
+      this.#newPointEditComponent = null;
+
+      document.removeEventListener('keydown', this.#escKeyDownHandler);
+    });
+
+    this.#newPointEditComponent.setFormSubmitHandler((point) => {
+      this.#tripModel.addPoint(point);
+
+      document.removeEventListener('keydown', this.#escKeyDownHandler);
+
+      this.#newPointEditComponent = null;
+
+      this.rerender();
+    });
+
+    render(
+      this.#newPointEditComponent,
+      this.#pointListComponent.element,
+      RenderPosition.AFTERBEGIN
+    );
+}
+
 
   rerender() {
     this.#clearTripBoard();
