@@ -99,8 +99,7 @@ export default class TripPresenter {
       this.#pointListComponent.element,
       RenderPosition.AFTERBEGIN
     );
-}
-
+  }
 
   rerender() {
     this.#clearTripBoard();

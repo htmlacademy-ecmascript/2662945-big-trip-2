@@ -1,5 +1,3 @@
-import { render } from './framework/render.js';
-
 import TripPresenter from './presenter/presenterTrip.js';
 import FilterPresenter from './presenter/filter-presenter.js';
 

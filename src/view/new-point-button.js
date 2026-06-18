@@ -20,7 +20,6 @@ export default class ViewNewPointButton extends AbstractView {
 
   #handleClick = (evt) => {
     evt.preventDefault();
-    console.log('BUTTON CLICKED');
     this.#onClick?.();
   };
 }
