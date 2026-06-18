@@ -204,7 +204,9 @@ export default class ViewEditPoint extends AbstractStatefulView {
               <input
                 class="event__input event__input--price"
                 id="event-price-${pointId}"
-                type="number"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 name="event-price"
                 value="${basePrice}"
                 min="0"
