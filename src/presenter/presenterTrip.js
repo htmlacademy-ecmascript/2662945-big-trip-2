@@ -1,4 +1,3 @@
-
 import { render, remove, RenderPosition } from '../framework/render.js';
 import ViewSort from '../view/sort.js';
 import { SortType, FilterType } from '../mocks/const.js';
@@ -23,15 +22,13 @@ export default class TripPresenter {
   #emptyPointListComponent = null;
   #newPointEditComponent = null;
   #currentSortType = SortType.DAY;
-  #isCreatingNewPoint = false;
 
   #escKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape' && this.#newPointEditComponent) {
-      remove(this.#newPointEditComponent);
-      this.#newPointEditComponent = null;
-
-      document.removeEventListener('keydown', this.#escKeyDownHandler);
+    if (evt.key !== 'Escape' || !this.#newPointEditComponent) {
+      return;
     }
+
+    this.#closeNewPointForm();
   };
 
   constructor({ eventsContainer, tripModel, filterModel }) {
@@ -49,7 +46,7 @@ export default class TripPresenter {
       return;
     }
 
-    this.#handleModeChange();
+    this.#closeOpenedForms();
 
     const destination = this.#tripModel.destinations[0];
 
@@ -57,7 +54,7 @@ export default class TripPresenter {
       point: {
         id: 'new-point',
         type: 'flight',
-        destination: destination.id,
+        destination: destination?.id ?? '',
         basePrice: 0,
         dateFrom: new Date(),
         dateTo: new Date(),
@@ -68,31 +65,22 @@ export default class TripPresenter {
       offers: this.#tripModel.offers,
       isCreating: true,
     });
-    document.addEventListener('keydown', this.#escKeyDownHandler);
 
     this.#newPointEditComponent.setRollupClickHandler(() => {
-      remove(this.#newPointEditComponent);
-      this.#newPointEditComponent = null;
-
-      document.removeEventListener('keydown', this.#escKeyDownHandler);
+      this.#closeNewPointForm();
     });
 
     this.#newPointEditComponent.setDeleteClickHandler(() => {
-      remove(this.#newPointEditComponent);
-      this.#newPointEditComponent = null;
-
-      document.removeEventListener('keydown', this.#escKeyDownHandler);
+      this.#closeNewPointForm();
     });
 
     this.#newPointEditComponent.setFormSubmitHandler((point) => {
       this.#tripModel.addPoint(point);
-
-      document.removeEventListener('keydown', this.#escKeyDownHandler);
-
-      this.#newPointEditComponent = null;
-
+      this.#closeNewPointForm();
       this.rerender();
     });
+
+    document.addEventListener('keydown', this.#escKeyDownHandler);
 
     render(
       this.#newPointEditComponent,
@@ -114,7 +102,9 @@ export default class TripPresenter {
       case FilterType.FUTURE:
         return points.filter((point) => new Date(point.dateFrom) > now);
       case FilterType.PRESENT:
-        return points.filter((point) => new Date(point.dateFrom) <= now && new Date(point.dateTo) >= now);
+        return points.filter(
+          (point) => new Date(point.dateFrom) <= now && new Date(point.dateTo) >= now
+        );
       case FilterType.PAST:
         return points.filter((point) => new Date(point.dateTo) < now);
       case FilterType.EVERYTHING:
@@ -140,7 +130,7 @@ export default class TripPresenter {
   #renderTrip() {
     const points = this.#getSortedPoints();
 
-    if (points.length === 0 && !this.#isCreatingNewPoint) {
+    if (points.length === 0 && !this.#newPointEditComponent) {
       this.#emptyPointListComponent = new ViewEmptyPointListFilter({
         filterType: this.#filterModel.filter,
       });
@@ -197,8 +187,21 @@ export default class TripPresenter {
     remove(this.#emptyPointListComponent);
     this.#emptyPointListComponent = null;
 
+    this.#closeNewPointForm();
+  }
+
+  #closeOpenedForms() {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+
+    if (this.#newPointEditComponent) {
+      this.#closeNewPointForm();
+    }
+  }
+
+  #closeNewPointForm() {
     remove(this.#newPointEditComponent);
     this.#newPointEditComponent = null;
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
   #handleSortTypeChange = (sortType) => {
@@ -220,6 +223,6 @@ export default class TripPresenter {
   };
 
   #handleModeChange = () => {
-    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+    this.#closeOpenedForms();
   };
 }
