@@ -56,3 +56,10 @@ export const SortType = {
   TIME: 'sort-time',
   PRICE: 'sort-price',
 };
+
+export const FilterType = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past',
+};

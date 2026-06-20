@@ -44,6 +44,7 @@ export default class PointPresenter {
 
     this.#pointComponent.setEditClickHandler(this.#handleEditClick);
     this.#pointComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
+
     this.#editPointComponent.setFormSubmitHandler(this.#handleFormSubmit);
     this.#editPointComponent.setRollupClickHandler(this.#handleRollupClick);
     this.#editPointComponent.setDeleteClickHandler(this.#handleDeleteClick);
@@ -55,6 +56,7 @@ export default class PointPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
     remove(this.#pointComponent);
     remove(this.#editPointComponent);
+    this.#isEditMode = false;
   }
 
   update(point) {
@@ -78,6 +80,7 @@ export default class PointPresenter {
 
     this.#pointComponent.setEditClickHandler(this.#handleEditClick);
     this.#pointComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
+
     this.#editPointComponent.setFormSubmitHandler(this.#handleFormSubmit);
     this.#editPointComponent.setRollupClickHandler(this.#handleRollupClick);
     this.#editPointComponent.setDeleteClickHandler(this.#handleDeleteClick);
@@ -117,8 +120,8 @@ export default class PointPresenter {
     this.#replaceFormToPoint();
   };
 
-  #handleFormSubmit = (evt) => {
-    evt.preventDefault();
+  #handleFormSubmit = (updatedPoint) => {
+    this.#onDataChange(updatedPoint);
     this.#replaceFormToPoint();
   };
 

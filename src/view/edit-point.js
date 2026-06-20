@@ -31,21 +31,12 @@ export default class ViewEditPoint extends AbstractStatefulView {
 
   get template() {
     const { point, destinations, offers, isCreating } = this._state;
-
-    const {
-      type,
-      destination,
-      basePrice,
-      dateFrom,
-      dateTo,
-      offers: selectedOfferIds,
-    } = point;
+    const { type, destination, basePrice, dateFrom, dateTo, offers: selectedOfferIds } = point;
 
     const offersByType = offers.find((offer) => offer.type === type);
     const availableOffers = offersByType ? offersByType.offers : [];
-
-    const pointId = point.id;
     const destinationData = destinations.find((dest) => dest.id === destination);
+    const pointId = point.id;
 
     const typeItems = TYPES.map((item) => {
       const value = item.toLowerCase();
@@ -84,7 +75,7 @@ export default class ViewEditPoint extends AbstractStatefulView {
           for="event-offer-${offer.id}-${pointId}"
         >
           <span class="event__offer-title">${offer.title}</span>
-          &plus;&euro;&nbsp;
+          +€&nbsp;
           <span class="event__offer-price">${offer.price}</span>
         </label>
       </div>
@@ -94,7 +85,7 @@ export default class ViewEditPoint extends AbstractStatefulView {
       <option value="${dest.name}"></option>
     `).join('');
 
-    const offersSection = offersItems
+    const offersSection = availableOffers.length
       ? `
         <section class="event__section event__section--offers">
           <h3 class="event__section-title event__section-title--offers">Offers</h3>
@@ -175,6 +166,8 @@ export default class ViewEditPoint extends AbstractStatefulView {
                 name="event-destination"
                 value="${destinationData ? destinationData.name : ''}"
                 list="destination-list-${pointId}"
+                autocomplete="off"
+                required
               >
 
               <datalist id="destination-list-${pointId}">
@@ -212,8 +205,13 @@ export default class ViewEditPoint extends AbstractStatefulView {
                 class="event__input event__input--price"
                 id="event-price-${pointId}"
                 type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 name="event-price"
                 value="${basePrice}"
+                min="0"
+                step="1"
+                required
               >
             </div>
 
@@ -255,21 +253,52 @@ export default class ViewEditPoint extends AbstractStatefulView {
 
   setFormSubmitHandler(callback) {
     this.#onFormSubmit = callback;
-    this.element.querySelector('form').addEventListener('submit', callback);
+    this.element.querySelector('form').addEventListener('submit', this.#handleSubmit);
   }
 
   setRollupClickHandler(callback) {
     this.#onRollupClick = callback;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', callback);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleRollupClick);
   }
 
   setDeleteClickHandler(callback) {
     this.#onDeleteClick = callback;
-    this.element.querySelector('.event__reset-btn').addEventListener('click', (evt) => {
-      evt.preventDefault();
-      callback();
-    });
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#handleDeleteClick);
   }
+
+  #handleSubmit = (evt) => {
+    evt.preventDefault();
+
+    const { point, destinations } = this._state;
+    const destinationInput = this.element.querySelector('.event__input--destination');
+    const priceInput = this.element.querySelector('.event__input--price');
+
+    const destination = destinations.find((dest) => dest.name === destinationInput.value.trim());
+    const basePrice = Number(priceInput.value);
+
+    if (!destination || Number.isNaN(basePrice)) {
+      this.element.querySelector('form').reportValidity();
+      return;
+    }
+
+    const updatedPoint = {
+      ...point,
+      destination: destination.id,
+      basePrice,
+    };
+
+    this.#onFormSubmit?.(updatedPoint);
+  };
+
+  #handleRollupClick = (evt) => {
+    evt.preventDefault();
+    this.#onRollupClick?.();
+  };
+
+  #handleDeleteClick = (evt) => {
+    evt.preventDefault();
+    this.#onDeleteClick?.();
+  };
 
   #setTypeChangeHandler() {
     this.element.querySelector('.event__type-group').addEventListener('change', (evt) => {
@@ -291,12 +320,16 @@ export default class ViewEditPoint extends AbstractStatefulView {
 
   #setDestinationChangeHandler() {
     this.element.querySelector('.event__input--destination').addEventListener('change', (evt) => {
-      const inputValue = evt.target.value;
+      const inputValue = evt.target.value.trim();
       const destination = this._state.destinations.find((dest) => dest.name === inputValue);
 
       if (!destination) {
+        evt.target.setCustomValidity('Choose a city from the list');
+        evt.target.reportValidity();
         return;
       }
+
+      evt.target.setCustomValidity('');
 
       this.updateElement({
         point: {
@@ -308,10 +341,9 @@ export default class ViewEditPoint extends AbstractStatefulView {
   }
 
   #setDatepickers() {
-    const startInput = this.element.querySelector(`#event-start-time-${this._state.point.id}`
-    );
-    const endInput = this.element.querySelector(`#event-end-time-${this._state.point.id}`
-    );
+    const startInput = this.element.querySelector(`#event-start-time-${this._state.point.id}`);
+    const endInput = this.element.querySelector(`#event-end-time-${this._state.point.id}`);
+
     this.#dateFromPicker = flatpickr(startInput, {
       dateFormat: DateFormat.FLATPICKR,
       defaultDate: this._state.point.dateFrom,

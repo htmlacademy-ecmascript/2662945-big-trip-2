@@ -9,8 +9,6 @@ export default class ViewSort extends AbstractView {
     super();
     this.#currentSortType = currentSortType;
     this.#onSortTypeChange = onSortTypeChange;
-
-    this.element.addEventListener('click', this.#sortTypeClickHandler);
   }
 
   get template() {
@@ -80,6 +78,12 @@ export default class ViewSort extends AbstractView {
         </div>
       </form>
     `;
+  }
+
+  get element() {
+    const element = super.element;
+    element.addEventListener('click', this.#sortTypeClickHandler);
+    return element;
   }
 
   #sortTypeClickHandler = (evt) => {
