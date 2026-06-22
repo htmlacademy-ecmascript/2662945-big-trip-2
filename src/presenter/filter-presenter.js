@@ -1,4 +1,4 @@
-import { render } from '../framework/render.js';
+import { render, remove } from '../framework/render.js';
 import ViewFilters from '../view/filters.js';
 
 export default class FilterPresenter {
@@ -20,6 +20,11 @@ export default class FilterPresenter {
     });
 
     render(this.#filtersComponent, this.#filtersContainer);
+  }
+
+  destroy() {
+    remove(this.#filtersComponent);
+    this.#filtersComponent = null;
   }
 
   #handleFilterTypeChange = (filterType) => {

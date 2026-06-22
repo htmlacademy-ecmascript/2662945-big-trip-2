@@ -4,6 +4,7 @@ import { SortType } from '../mocks/const.js';
 export default class ViewSort extends AbstractView {
   #currentSortType = SortType.DAY;
   #onSortTypeChange = null;
+  #isListenersAdded = false;
 
   constructor({ currentSortType, onSortTypeChange }) {
     super();
@@ -82,11 +83,16 @@ export default class ViewSort extends AbstractView {
 
   get element() {
     const element = super.element;
-    element.addEventListener('click', this.#sortTypeClickHandler);
+
+    if (!this.#isListenersAdded) {
+      element.addEventListener('change', this.#sortTypeChangeHandler);
+      this.#isListenersAdded = true;
+    }
+
     return element;
   }
 
-  #sortTypeClickHandler = (evt) => {
+  #sortTypeChangeHandler = (evt) => {
     const input = evt.target.closest('.trip-sort__input');
 
     if (!input || input.disabled) {
@@ -99,6 +105,6 @@ export default class ViewSort extends AbstractView {
       return;
     }
 
-    this.#onSortTypeChange(sortType);
+    this.#onSortTypeChange?.(sortType);
   };
 }

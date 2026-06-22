@@ -3,18 +3,17 @@ import duration from 'dayjs/plugin/duration';
 
 dayjs.extend(duration);
 
-const DATE_FORMAT = 'MMM DD';
+const DATE_FORMAT = 'MMM D';
 const TIME_FORMAT = 'HH:mm';
-const FORM_DATE_FORMAT = 'DD/MM/YY HH:mm';
+const EDIT_DATE_FORMAT = 'DD/MM/YY HH:mm';
 
-const humanizeEventDate = (date) => dayjs(date).format(DATE_FORMAT).toUpperCase();
-const humanizeEventTime = (date) => dayjs(date).format(TIME_FORMAT);
-const humanizeEditEventDate = (date) => dayjs(date).format(FORM_DATE_FORMAT);
+export const humanizeEventDate = (date) => dayjs(date).format(DATE_FORMAT);
+export const humanizeEventTime = (date) => dayjs(date).format(TIME_FORMAT);
+export const humanizeEditEventDate = (date) => dayjs(date).format(EDIT_DATE_FORMAT);
 
-const getEventDuration = (dateFrom, dateTo) => {
+export const getEventDuration = (dateFrom, dateTo) => {
   const diff = dayjs(dateTo).diff(dayjs(dateFrom));
   const eventDuration = dayjs.duration(diff);
-
   const days = eventDuration.days();
   const hours = eventDuration.hours();
   const minutes = eventDuration.minutes();
@@ -30,11 +29,4 @@ const getEventDuration = (dateFrom, dateTo) => {
   }
 
   return `${formatItem(minutes)}M`;
-};
-
-export {
-  humanizeEventDate,
-  humanizeEventTime,
-  humanizeEditEventDate,
-  getEventDuration,
 };

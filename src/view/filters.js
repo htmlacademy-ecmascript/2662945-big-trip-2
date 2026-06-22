@@ -3,6 +3,7 @@ import AbstractView from '../framework/view/abstract-view.js';
 export default class ViewFilters extends AbstractView {
   #currentFilterType = null;
   #onFilterTypeChange = null;
+  #isListenersAdded = false;
 
   constructor({ currentFilterType, onFilterTypeChange }) {
     super();
@@ -66,7 +67,12 @@ export default class ViewFilters extends AbstractView {
 
   get element() {
     const element = super.element;
-    element.addEventListener('change', this.#handleChange);
+
+    if (!this.#isListenersAdded) {
+      element.addEventListener('change', this.#handleChange);
+      this.#isListenersAdded = true;
+    }
+
     return element;
   }
 

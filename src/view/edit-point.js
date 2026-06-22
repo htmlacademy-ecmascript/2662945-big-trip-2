@@ -4,6 +4,7 @@ import 'flatpickr/dist/flatpickr.min.css';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { TYPES } from '../mocks/const.js';
 import { humanizeEditEventDate } from '../utils/point.js';
+import { normalizePositiveInteger } from '../utils/utils.js';
 
 const DateFormat = {
   FLATPICKR: 'd/m/y H:i',
@@ -248,6 +249,7 @@ export default class ViewEditPoint extends AbstractStatefulView {
 
     this.#setTypeChangeHandler();
     this.#setDestinationChangeHandler();
+    this.#setPriceInputHandler();
     this.#setDatepickers();
   }
 
@@ -266,20 +268,32 @@ export default class ViewEditPoint extends AbstractStatefulView {
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#handleDeleteClick);
   }
 
-  #handleSubmit = (evt) => {
+  #handleSubmit = async (evt) => {
     evt.preventDefault();
 
     const { point, destinations } = this._state;
     const destinationInput = this.element.querySelector('.event__input--destination');
     const priceInput = this.element.querySelector('.event__input--price');
 
-    const destination = destinations.find((dest) => dest.name === destinationInput.value.trim());
+    const destination = destinations.find(
+      (dest) => dest.name === destinationInput.value.trim()
+    );
     const basePrice = Number(priceInput.value);
 
-    if (!destination || Number.isNaN(basePrice)) {
-      this.element.querySelector('form').reportValidity();
+    if (!destination) {
+      destinationInput.setCustomValidity('Choose a city from the list');
+      destinationInput.reportValidity();
       return;
     }
+
+    if (!Number.isInteger(basePrice) || basePrice <= 0) {
+      priceInput.setCustomValidity('Price must be a positive integer');
+      priceInput.reportValidity();
+      return;
+    }
+
+    destinationInput.setCustomValidity('');
+    priceInput.setCustomValidity('');
 
     const updatedPoint = {
       ...point,
@@ -287,7 +301,7 @@ export default class ViewEditPoint extends AbstractStatefulView {
       basePrice,
     };
 
-    this.#onFormSubmit?.(updatedPoint);
+    await this.#onFormSubmit?.(updatedPoint);
   };
 
   #handleRollupClick = (evt) => {
@@ -337,6 +351,12 @@ export default class ViewEditPoint extends AbstractStatefulView {
           destination: destination.id,
         },
       });
+    });
+  }
+
+  #setPriceInputHandler() {
+    this.element.querySelector('.event__input--price').addEventListener('input', (evt) => {
+      evt.target.value = normalizePositiveInteger(evt.target.value);
     });
   }
 
