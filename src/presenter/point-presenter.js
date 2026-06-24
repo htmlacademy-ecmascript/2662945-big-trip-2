@@ -99,7 +99,7 @@ export default class PointPresenter {
       const result = await this.#onDataChange(updatedPoint);
       this.update(result);
     } catch (error) {
-      //доделаю во второй части
+      this.#editPointComponent?.setAborting();
     }
   };
 
@@ -107,26 +107,28 @@ export default class PointPresenter {
     this.#replaceFormToCard();
   };
 
-  #handleDeleteClick = () => {
-    this.#replaceFormToCard();
+  #handleDeleteClick = async () => {
+    try {
+      this.#editPointComponent?.setDeleting();
+      await this.#onDataChange(this.#point, 'delete');
+    } catch (error) {
+      this.#editPointComponent?.setAborting();
+    }
   };
 
   #handleFormSubmit = async (updatedPoint) => {
-
     try {
+      this.#editPointComponent?.setSaving();
       const result = await this.#onDataChange(updatedPoint);
-
-      this.#point = result;
       this.#replaceFormToCard();
       this.update(result);
     } catch (error) {
-      //доделаю во второй чатси
+      this.#editPointComponent?.setAborting();
     }
   };
 
   #replaceCardToForm() {
     this.#onModeChange();
-
     replace(this.#editPointComponent, this.#pointComponent);
     document.addEventListener('keydown', this.#handleEscKeyDown);
     this.#mode = Mode.EDITING;
@@ -145,3 +147,4 @@ export default class PointPresenter {
     }
   };
 }
+

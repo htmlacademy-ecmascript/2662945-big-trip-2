@@ -9,16 +9,23 @@ export const adaptPointToClient = (point) => ({
   type: point.type,
 });
 
-export const adaptPointToServer = (point) => ({
-  id: point.id,
-  'base_price': point.basePrice,
-  'date_from': point.dateFrom,
-  'date_to': point.dateTo,
-  destination: point.destination,
-  'is_favorite': point.isFavorite,
-  offers: point.offers,
-  type: point.type,
-});
+export const adaptPointToServer = (point) => {
+  const adaptedPoint = {
+    'base_price': point.basePrice,
+    'date_from': point.dateFrom,
+    'date_to': point.dateTo,
+    destination: point.destination,
+    'is_favorite': point.isFavorite,
+    offers: point.offers,
+    type: point.type,
+  };
+
+  if (point.id !== 'new-point') {
+    adaptedPoint.id = point.id;
+  }
+
+  return adaptedPoint;
+};
 
 export const adaptDestinationToClient = (destination) => ({
   id: destination.id,

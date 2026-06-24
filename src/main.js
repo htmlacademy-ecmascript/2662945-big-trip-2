@@ -35,7 +35,7 @@ tripMainContainer.append(newPointButton.element);
   try {
     await tripModel.init();
   } catch (error) {
-    // пустое состояние
+    //пусто
   } finally {
     tripPresenter.setLoadingFinished();
     tripPresenter.init();

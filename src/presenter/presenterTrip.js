@@ -12,7 +12,6 @@ export default class TripPresenter {
   #eventsContainer = null;
   #tripModel = null;
   #filterModel = null;
-
   #pointPresenters = new Map();
   #sortComponent = null;
   #pointListComponent = null;
@@ -94,7 +93,6 @@ export default class TripPresenter {
       this.#emptyPointListComponent = new ViewEmptyPointListFilter({
         filterType: this.#filterModel.filter,
       });
-
       render(this.#emptyPointListComponent, this.#eventsContainer);
       return;
     }
@@ -115,7 +113,17 @@ export default class TripPresenter {
       point,
       destinations: this.#tripModel.destinations,
       offers: this.#tripModel.offers,
-      onDataChange: async (updatedPoint) => this.#tripModel.updatePointOnServer(updatedPoint),
+      onDataChange: async (updatedPoint, action) => {
+        if (action === 'delete') {
+          await this.#tripModel.deletePointOnServer(updatedPoint);
+          this.#pointPresenters.get(updatedPoint.id)?.destroy();
+          this.#pointPresenters.delete(updatedPoint.id);
+          this.rerender();
+          return;
+        }
+
+        return this.#tripModel.updatePointOnServer(updatedPoint);
+      },
       onModeChange: () => this.#clearOpenedForms(),
     });
 
@@ -133,8 +141,8 @@ export default class TripPresenter {
         type: firstOfferType,
         destination: firstDestination?.id ?? '',
         basePrice: 0,
-        dateFrom: new Date(),
-        dateTo: new Date(),
+        dateFrom: new Date().toISOString(),
+        dateTo: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
         offers: [],
         isFavorite: false,
       },
@@ -203,7 +211,8 @@ export default class TripPresenter {
 
   #handleNewPointSubmit = async (newPoint) => {
     try {
-      await this.#tripModel.updatePointOnServer(newPoint);
+      this.#newPointEditComponent?.setSaving();
+      await this.#tripModel.addPointOnServer(newPoint);
       this.#closeNewPointForm();
       this.rerender();
     } catch (error) {
