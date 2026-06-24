@@ -2,25 +2,23 @@ import { render, replace, remove } from '../framework/render.js';
 import ViewPoint from '../view/point.js';
 import ViewEditPoint from '../view/edit-point.js';
 
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
+
 export default class PointPresenter {
-  #pointComponent = null;
-  #editPointComponent = null;
   #container = null;
   #point = null;
-  #destinations = null;
-  #offers = null;
+  #destinations = [];
+  #offers = [];
+  #pointComponent = null;
+  #editPointComponent = null;
+  #mode = Mode.DEFAULT;
   #onDataChange = null;
   #onModeChange = null;
-  #isEditMode = false;
 
-  constructor({
-    container,
-    point,
-    destinations,
-    offers,
-    onDataChange,
-    onModeChange
-  }) {
+  constructor({ container, point, destinations, offers, onDataChange, onModeChange }) {
     this.#container = container;
     this.#point = point;
     this.#destinations = destinations;
@@ -30,13 +28,10 @@ export default class PointPresenter {
   }
 
   init() {
-    this.#pointComponent = new ViewPoint({
-      point: this.#point,
-      destinations: this.#destinations,
-      offers: this.#offers,
-    });
+    const prevPointComponent = this.#pointComponent;
+    const prevEditPointComponent = this.#editPointComponent;
 
-    this.#editPointComponent = new ViewEditPoint({
+    this.#pointComponent = new ViewPoint({
       point: this.#point,
       destinations: this.#destinations,
       offers: this.#offers,
@@ -45,101 +40,108 @@ export default class PointPresenter {
     this.#pointComponent.setEditClickHandler(this.#handleEditClick);
     this.#pointComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
 
+    this.#editPointComponent = new ViewEditPoint({
+      point: this.#point,
+      destinations: this.#destinations,
+      offers: this.#offers,
+      isCreating: false,
+    });
+
     this.#editPointComponent.setFormSubmitHandler(this.#handleFormSubmit);
     this.#editPointComponent.setRollupClickHandler(this.#handleRollupClick);
     this.#editPointComponent.setDeleteClickHandler(this.#handleDeleteClick);
 
-    render(this.#pointComponent, this.#container);
+    if (prevPointComponent === null || prevEditPointComponent === null) {
+      render(this.#pointComponent, this.#container);
+      return;
+    }
+
+    if (this.#mode === Mode.DEFAULT) {
+      replace(this.#pointComponent, prevPointComponent);
+    }
+
+    if (this.#mode === Mode.EDITING) {
+      replace(this.#editPointComponent, prevEditPointComponent);
+    }
+
+    remove(prevPointComponent);
+    remove(prevEditPointComponent);
   }
 
   destroy() {
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
     remove(this.#pointComponent);
     remove(this.#editPointComponent);
-    this.#isEditMode = false;
+    document.removeEventListener('keydown', this.#handleEscKeyDown);
+  }
+
+  resetView() {
+    if (this.#mode === Mode.EDITING) {
+      this.#replaceFormToCard();
+    }
   }
 
   update(point) {
     this.#point = point;
-
-    const prevPointComponent = this.#pointComponent;
-    const prevEditPointComponent = this.#editPointComponent;
-    const wasEditMode = this.#isEditMode;
-
-    this.#pointComponent = new ViewPoint({
-      point: this.#point,
-      destinations: this.#destinations,
-      offers: this.#offers,
-    });
-
-    this.#editPointComponent = new ViewEditPoint({
-      point: this.#point,
-      destinations: this.#destinations,
-      offers: this.#offers,
-    });
-
-    this.#pointComponent.setEditClickHandler(this.#handleEditClick);
-    this.#pointComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
-
-    this.#editPointComponent.setFormSubmitHandler(this.#handleFormSubmit);
-    this.#editPointComponent.setRollupClickHandler(this.#handleRollupClick);
-    this.#editPointComponent.setDeleteClickHandler(this.#handleDeleteClick);
-
-    if (wasEditMode) {
-      replace(this.#editPointComponent, prevEditPointComponent);
-      return;
-    }
-
-    replace(this.#pointComponent, prevPointComponent);
-  }
-
-  resetView() {
-    if (this.#isEditMode) {
-      this.#replaceFormToPoint();
-    }
-  }
-
-  #replacePointToForm() {
-    replace(this.#editPointComponent, this.#pointComponent);
-    document.addEventListener('keydown', this.#escKeyDownHandler);
-    this.#isEditMode = true;
-  }
-
-  #replaceFormToPoint() {
-    replace(this.#pointComponent, this.#editPointComponent);
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
-    this.#isEditMode = false;
+    this.init();
   }
 
   #handleEditClick = () => {
-    this.#onModeChange();
-    this.#replacePointToForm();
+    this.#replaceCardToForm();
+  };
+
+  #handleFavoriteClick = async () => {
+    try {
+      const updatedPoint = {
+        ...this.#point,
+        isFavorite: !this.#point.isFavorite,
+      };
+
+      const result = await this.#onDataChange(updatedPoint);
+      this.update(result);
+    } catch (error) {
+      //доделаю во второй части
+    }
   };
 
   #handleRollupClick = () => {
-    this.#replaceFormToPoint();
-  };
-
-  #handleFormSubmit = (updatedPoint) => {
-    this.#onDataChange(updatedPoint);
-    this.#replaceFormToPoint();
+    this.#replaceFormToCard();
   };
 
   #handleDeleteClick = () => {
-    this.#replaceFormToPoint();
+    this.#replaceFormToCard();
   };
 
-  #handleFavoriteClick = () => {
-    this.#onDataChange({
-      ...this.#point,
-      isFavorite: !this.#point.isFavorite,
-    });
+  #handleFormSubmit = async (updatedPoint) => {
+
+    try {
+      const result = await this.#onDataChange(updatedPoint);
+
+      this.#point = result;
+      this.#replaceFormToCard();
+      this.update(result);
+    } catch (error) {
+      //доделаю во второй чатси
+    }
   };
 
-  #escKeyDownHandler = (evt) => {
+  #replaceCardToForm() {
+    this.#onModeChange();
+
+    replace(this.#editPointComponent, this.#pointComponent);
+    document.addEventListener('keydown', this.#handleEscKeyDown);
+    this.#mode = Mode.EDITING;
+  }
+
+  #replaceFormToCard() {
+    replace(this.#pointComponent, this.#editPointComponent);
+    document.removeEventListener('keydown', this.#handleEscKeyDown);
+    this.#mode = Mode.DEFAULT;
+  }
+
+  #handleEscKeyDown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      this.#replaceFormToPoint();
+      this.#replaceFormToCard();
     }
   };
 }

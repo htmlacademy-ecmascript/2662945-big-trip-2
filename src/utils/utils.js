@@ -28,3 +28,9 @@ export function getDate({ next }) {
     .subtract(minsGap, 'minute')
     .toDate();
 }
+
+export function normalizePositiveInteger(value) {
+  const digits = String(value).replace(/\D/g, '');
+  return digits.replace(/^0+/, '');
+}
+

@@ -1,52 +1,60 @@
-import { generateMockPoints } from '../mocks/points.js';
-import { generateMockDestinations } from '../mocks/destination.js';
-import { generateMockOffers } from '../mocks/offers.js';
-import { getRandomArrayElement } from '../utils/utils.js';
-import { TYPES, POINTS_COUNT } from '../mocks/const.js';
+import {
+  adaptDestinationToClient,
+  adaptOfferToClient,
+  adaptPointToClient,
+  adaptPointToServer
+} from '../utils/adapter.js';
 
 export default class TripModel {
-  constructor() {
-    this.destinationsData = Array.from({ length: POINTS_COUNT }, () => generateMockDestinations());
-    this.offersData = generateMockOffers();
+  #api = null;
+  #points = [];
+  #destinations = [];
+  #offers = [];
 
-    this.pointsData = Array.from({ length: POINTS_COUNT }, () => {
-      const destination = getRandomArrayElement(this.destinationsData);
-      const type = getRandomArrayElement(TYPES).toLowerCase();
-      const offersByType = this.offersData.find((offer) => offer.type === type);
-      const allOfferIds = offersByType ? offersByType.offers.map((offer) => offer.id) : [];
-      const randomOffersIds = allOfferIds.filter(() => Math.random() < 0.5);
-
-      return generateMockPoints(type, destination.id, randomOffersIds);
-    });
+  constructor(api) {
+    this.#api = api;
   }
 
   get points() {
-    return this.pointsData;
+    return this.#points;
   }
 
   get destinations() {
-    return this.destinationsData;
+    return this.#destinations;
   }
 
   get offers() {
-    return this.offersData;
+    return this.#offers;
+  }
+
+  async init() {
+    const [points, destinations, offers] = await Promise.all([
+      this.#api.loadPoints(),
+      this.#api.loadDestinations(),
+      this.#api.loadOffers(),
+    ]);
+
+    this.#points = points.map(adaptPointToClient);
+    this.#destinations = destinations.map(adaptDestinationToClient);
+    this.#offers = offers.map(adaptOfferToClient);
   }
 
   updatePoint(updatedPoint) {
-    const index = this.pointsData.findIndex((point) => point.id === updatedPoint.id);
+    const index = this.#points.findIndex((point) => point.id === updatedPoint.id);
 
     if (index === -1) {
       return;
     }
 
-    this.pointsData.splice(index, 1, updatedPoint);
+    this.#points.splice(index, 1, updatedPoint);
   }
 
-  addPoint(point) {
-    this.pointsData.unshift(point);
-  }
+  async updatePointOnServer(updatedPoint) {
+    const response = await this.#api.updatePoint(adaptPointToServer(updatedPoint));
+    const adaptedPoint = adaptPointToClient(response);
 
-  deletePoint(point) {
-    this.pointsData = this.pointsData.filter((item) => item.id !== point.id);
+    this.updatePoint(adaptedPoint);
+    return adaptedPoint;
   }
 }
+
