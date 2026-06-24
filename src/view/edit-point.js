@@ -1,6 +1,5 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
-
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { TYPES } from '../mocks/const.js';
 import { humanizeEditEventDate } from '../utils/point.js';
@@ -8,6 +7,13 @@ import { normalizePositiveInteger } from '../utils/utils.js';
 
 const DateFormat = {
   FLATPICKR: 'd/m/y H:i',
+};
+
+const ButtonText = {
+  SAVE: 'Save',
+  SAVING: 'Saving...',
+  DELETE: 'Delete',
+  DELETING: 'Deleting...',
 };
 
 export default class ViewEditPoint extends AbstractStatefulView {
@@ -32,7 +38,14 @@ export default class ViewEditPoint extends AbstractStatefulView {
 
   get template() {
     const { point, destinations, offers, isCreating } = this._state;
-    const { type, destination, basePrice, dateFrom, dateTo, offers: selectedOfferIds } = point;
+    const {
+      type,
+      destination,
+      basePrice,
+      dateFrom,
+      dateTo,
+      offers: selectedOfferIds,
+    } = point;
 
     const offersByType = offers.find((offer) => offer.type === type);
     const availableOffers = offersByType ? offersByType.offers : [];
@@ -86,48 +99,37 @@ export default class ViewEditPoint extends AbstractStatefulView {
       <option value="${dest.name}"></option>
     `).join('');
 
-    const offersSection = availableOffers.length
-      ? `
-        <section class="event__section event__section--offers">
-          <h3 class="event__section-title event__section-title--offers">Offers</h3>
-          <div class="event__available-offers">
-            ${offersItems}
-          </div>
-        </section>
-      `
-      : '';
+    const offersSection = availableOffers.length ? `
+      <section class="event__section event__section--offers">
+        <h3 class="event__section-title event__section-title--offers">Offers</h3>
+        <div class="event__available-offers">
+          ${offersItems}
+        </div>
+      </section>
+    ` : '';
 
-    const destinationSection = destinationData
-      ? `
-        <section class="event__section event__section--destination">
-          <h3 class="event__section-title event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">
-            ${destinationData.description}
-          </p>
-          <div class="event__photos-container">
-            <div class="event__photos-tape">
-              ${destinationData.pictures.map((pic) => `
-                <img
-                  class="event__photo"
-                  src="${pic.src}"
-                  alt="${pic.description}"
-                >
-              `).join('')}
-            </div>
+    const destinationSection = destinationData ? `
+      <section class="event__section event__section--destination">
+        <h3 class="event__section-title event__section-title--destination">Destination</h3>
+        <p class="event__destination-description">
+          ${destinationData.description}
+        </p>
+        <div class="event__photos-container">
+          <div class="event__photos-tape">
+            ${destinationData.pictures.map((pic) => `
+              <img class="event__photo" src="${pic.src}" alt="${pic.description}">
+            `).join('')}
           </div>
-        </section>
-      `
-      : '';
+        </div>
+      </section>
+    ` : '';
 
     return `
       <li class="trip-events__item">
         <form class="event event--edit" action="#" method="post">
           <header class="event__header">
             <div class="event__type-wrapper">
-              <label
-                class="event__type event__type-btn"
-                for="event-type-toggle-${pointId}"
-              >
+              <label class="event__type event__type-btn" for="event-type-toggle-${pointId}">
                 <span class="visually-hidden">Choose event type</span>
                 <img
                   class="event__type-icon"
@@ -137,13 +139,11 @@ export default class ViewEditPoint extends AbstractStatefulView {
                   alt="Event type icon"
                 >
               </label>
-
               <input
                 class="event__type-toggle visually-hidden"
                 id="event-type-toggle-${pointId}"
                 type="checkbox"
               >
-
               <div class="event__type-list">
                 <fieldset class="event__type-group">
                   <legend class="visually-hidden">Event type</legend>
@@ -153,13 +153,9 @@ export default class ViewEditPoint extends AbstractStatefulView {
             </div>
 
             <div class="event__field-group event__field-group--destination">
-              <label
-                class="event__label event__type-output"
-                for="event-destination-${pointId}"
-              >
+              <label class="event__label event__type-output" for="event-destination-${pointId}">
                 ${type}
               </label>
-
               <input
                 class="event__input event__input--destination"
                 id="event-destination-${pointId}"
@@ -170,7 +166,6 @@ export default class ViewEditPoint extends AbstractStatefulView {
                 autocomplete="off"
                 required
               >
-
               <datalist id="destination-list-${pointId}">
                 ${destinationsOptions}
               </datalist>
@@ -201,19 +196,15 @@ export default class ViewEditPoint extends AbstractStatefulView {
                 <span class="visually-hidden">Price</span>
                 €
               </label>
-
               <input
                 class="event__input event__input--price"
                 id="event-price-${pointId}"
                 type="text"
                 inputmode="numeric"
-                pattern="[0-9]*"
                 name="event-price"
                 value="${basePrice}"
-                min="0"
-                step="1"
                 required
-              >
+>
             </div>
 
             <button class="event__save-btn btn btn--blue" type="submit">Save</button>
@@ -239,6 +230,7 @@ export default class ViewEditPoint extends AbstractStatefulView {
     this.#dateToPicker?.destroy();
     this.#dateFromPicker = null;
     this.#dateToPicker = null;
+
     super.removeElement();
   }
 
@@ -246,7 +238,6 @@ export default class ViewEditPoint extends AbstractStatefulView {
     this.setFormSubmitHandler(this.#onFormSubmit);
     this.setRollupClickHandler(this.#onRollupClick);
     this.setDeleteClickHandler(this.#onDeleteClick);
-
     this.#setTypeChangeHandler();
     this.#setDestinationChangeHandler();
     this.#setPriceInputHandler();
@@ -268,6 +259,41 @@ export default class ViewEditPoint extends AbstractStatefulView {
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#handleDeleteClick);
   }
 
+  setSaving() {
+    this.#setDisabledState(true);
+    this.element.querySelector('.event__save-btn').textContent = ButtonText.SAVING;
+  }
+
+  setDeleting() {
+    this.#setDisabledState(true);
+    this.element.querySelector('.event__reset-btn').textContent = ButtonText.DELETING;
+  }
+
+  setAborting() {
+    this.element.classList.add('shake');
+    this.#setDisabledState(false);
+    this.#resetButtonsText();
+
+    this.element.addEventListener('animationend', this.#handleAnimationEnd, { once: true });
+  }
+
+  #handleAnimationEnd = () => {
+    this.element.classList.remove('shake');
+  };
+
+  #resetButtonsText() {
+    this.element.querySelector('.event__save-btn').textContent = ButtonText.SAVE;
+    this.element.querySelector('.event__reset-btn').textContent = this._state.isCreating ? 'Cancel' : ButtonText.DELETE;
+  }
+
+  #setDisabledState(isDisabled) {
+    const saveButton = this.element.querySelector('.event__save-btn');
+    const deleteButton = this.element.querySelector('.event__reset-btn');
+
+    saveButton.disabled = isDisabled;
+    deleteButton.disabled = isDisabled;
+  }
+
   #handleSubmit = async (evt) => {
     evt.preventDefault();
 
@@ -278,7 +304,12 @@ export default class ViewEditPoint extends AbstractStatefulView {
     const destination = destinations.find(
       (dest) => dest.name === destinationInput.value.trim()
     );
-    const basePrice = Number(priceInput.value);
+
+    const normalizedPrice = normalizePositiveInteger(priceInput.value);
+
+    priceInput.value = normalizedPrice;
+
+    const basePrice = Number(normalizedPrice);
 
     if (!destination) {
       destinationInput.setCustomValidity('Choose a city from the list');
@@ -286,7 +317,7 @@ export default class ViewEditPoint extends AbstractStatefulView {
       return;
     }
 
-    if (!Number.isInteger(basePrice) || basePrice <= 0) {
+    if (!normalizedPrice || !Number.isInteger(basePrice) || basePrice <= 0) {
       priceInput.setCustomValidity('Price must be a positive integer');
       priceInput.reportValidity();
       return;

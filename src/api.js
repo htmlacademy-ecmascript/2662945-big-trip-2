@@ -24,6 +24,19 @@ export default class ApiService {
     });
   }
 
+  async addPoint(point) {
+    return this.#load('/points', {
+      method: 'POST',
+      body: JSON.stringify(point),
+    });
+  }
+
+  async deletePoint(point) {
+    return this.#load(`/points/${point.id}`, {
+      method: 'DELETE',
+    });
+  }
+
   async #load(url, options = {}) {
     const response = await fetch(`${this.#endPoint}${url}`, {
       ...options,
@@ -35,6 +48,10 @@ export default class ApiService {
 
     if (!response.ok) {
       throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+    }
+
+    if (response.status === 204) {
+      return null;
     }
 
     return response.json();
