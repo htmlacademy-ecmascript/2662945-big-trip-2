@@ -10,6 +10,7 @@ const EDIT_DATE_FORMAT = 'DD/MM/YY HH:mm';
 export const humanizeEventDate = (date) => dayjs(date).format(DATE_FORMAT);
 export const humanizeEventTime = (date) => dayjs(date).format(TIME_FORMAT);
 export const humanizeEditEventDate = (date) => dayjs(date).format(EDIT_DATE_FORMAT);
+export const humanizeHeaderDate = (date) => dayjs(date).format('D MMM');
 
 export const getEventDuration = (dateFrom, dateTo) => {
   const diff = dayjs(dateTo).diff(dayjs(dateFrom));
@@ -30,3 +31,4 @@ export const getEventDuration = (dateFrom, dateTo) => {
 
   return `${formatItem(minutes)}M`;
 };
+

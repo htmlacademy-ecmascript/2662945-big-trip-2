@@ -99,7 +99,7 @@ export default class PointPresenter {
       const result = await this.#onDataChange(updatedPoint);
       this.update(result);
     } catch (error) {
-      this.#editPointComponent?.setAborting();
+      this.#pointComponent?.shake?.();
     }
   };
 

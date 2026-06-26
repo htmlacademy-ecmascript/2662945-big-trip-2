@@ -4,6 +4,8 @@ import TripModel from './model/trip-model.js';
 import FilterModel from './model/filter-model.js';
 import ApiService from './api.js';
 import ViewNewPointButton from './view/new-point-button.js';
+import ViewLoading from './view/loading.js';
+import { render, remove, RenderPosition } from './framework/render.js';
 
 const filtersContainer = document.querySelector('.trip-controls__filters');
 const eventsContainer = document.querySelector('.trip-events');
@@ -22,23 +24,31 @@ const tripPresenter = new TripPresenter({
 const filterPresenter = new FilterPresenter({
   filtersContainer,
   filterModel,
-  onFilterChange: () => tripPresenter.rerender(),
+  tripModel,
+  onFilterChange: () => {
+    tripPresenter.rerender();
+    filterPresenter.rerender();
+  },
 });
+
+const loadingComponent = new ViewLoading();
+render(loadingComponent, eventsContainer, RenderPosition.BEFOREEND);
 
 const newPointButton = new ViewNewPointButton({
   onClick: () => tripPresenter.createPoint(),
 });
-
-tripMainContainer.append(newPointButton.element);
+render(newPointButton, tripMainContainer, RenderPosition.BEFOREEND);
 
 (async () => {
   try {
     await tripModel.init();
   } catch (error) {
-    //пусто
-  } finally {
-    tripPresenter.setLoadingFinished();
-    tripPresenter.init();
-    filterPresenter.init();
+    loadingComponent.element.textContent = 'Failed to load latest route information';
+    return;
   }
+
+  remove(loadingComponent);
+  tripPresenter.setLoadingFinished();
+  tripPresenter.init();
+  filterPresenter.init();
 })();

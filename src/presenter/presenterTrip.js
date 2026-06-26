@@ -7,6 +7,8 @@ import ViewEmptyPointListFilter from '../view/empty-point-list-filter.js';
 import ViewLoading from '../view/loading.js';
 import PointPresenter from './point-presenter.js';
 import ViewEditPoint from '../view/edit-point.js';
+import ViewTripInfo from '../view/trip-info.js';
+import { humanizeHeaderDate } from '../utils/point.js';
 
 export default class TripPresenter {
   #eventsContainer = null;
@@ -18,6 +20,7 @@ export default class TripPresenter {
   #emptyPointListComponent = null;
   #loadingComponent = null;
   #newPointEditComponent = null;
+  #tripInfoComponent = null;
   #currentSortType = SortType.DAY;
   #isLoading = true;
 
@@ -46,6 +49,9 @@ export default class TripPresenter {
     }
 
     this.#clearOpenedForms();
+    this.#filterModel.setFilter(FilterType.EVERYTHING);
+    this.#currentSortType = SortType.DAY;
+    this.rerender();
     this.#renderNewPointForm();
   }
 
@@ -80,6 +86,57 @@ export default class TripPresenter {
     }
   }
 
+  #getRouteCities(points) {
+    const cities = points
+      .map((point) => this.#tripModel.destinations.find((dest) => dest.id === point.destination)?.name)
+      .filter(Boolean);
+
+    if (cities.length <= 3) {
+      return cities.join(' — ');
+    }
+
+    return `${cities[0]} —...— ${cities[cities.length - 1]}`;
+  }
+
+  #getTripDates(points) {
+    if (points.length === 0) {
+      return '';
+    }
+
+    const sortedPoints = [...points].sort(sortPointByDay);
+    const firstPoint = sortedPoints[0];
+    const lastPoint = sortedPoints[sortedPoints.length - 1];
+
+    return `${humanizeHeaderDate(firstPoint.dateFrom)} — ${humanizeHeaderDate(lastPoint.dateTo)}`;
+  }
+
+  #getTripPrice(points) {
+    return points.reduce((sum, point) => {
+      const offersByType = this.#tripModel.offers.find((offerGroup) => offerGroup.type === point.type);
+      const availableOffers = offersByType ? offersByType.offers : [];
+      const selectedOffers = availableOffers.filter((offer) => point.offers.includes(offer.id));
+      const offersPrice = selectedOffers.reduce((offerSum, offer) => offerSum + offer.price, 0);
+
+      return sum + point.basePrice + offersPrice;
+    }, 0);
+  }
+
+  #renderTripInfo() {
+    const points = this.#getSortedPoints();
+
+    if (points.length === 0) {
+      return;
+    }
+
+    this.#tripInfoComponent = new ViewTripInfo({
+      route: this.#getRouteCities(points),
+      date: this.#getTripDates(points),
+      price: this.#getTripPrice(points),
+    });
+
+    render(this.#tripInfoComponent, this.#eventsContainer, RenderPosition.BEFOREBEGIN);
+  }
+
   #renderTrip() {
     if (this.#isLoading) {
       this.#loadingComponent = new ViewLoading();
@@ -88,6 +145,8 @@ export default class TripPresenter {
     }
 
     const points = this.#getSortedPoints();
+
+    this.#renderTripInfo();
 
     if (points.length === 0 && !this.#newPointEditComponent) {
       this.#emptyPointListComponent = new ViewEmptyPointListFilter({
@@ -122,7 +181,9 @@ export default class TripPresenter {
           return;
         }
 
-        return this.#tripModel.updatePointOnServer(updatedPoint);
+        const result = await this.#tripModel.updatePointOnServer(updatedPoint);
+        this.rerender();
+        return result;
       },
       onModeChange: () => this.#clearOpenedForms(),
     });
@@ -182,12 +243,14 @@ export default class TripPresenter {
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
 
+    remove(this.#tripInfoComponent);
     remove(this.#sortComponent);
     remove(this.#pointListComponent);
     remove(this.#emptyPointListComponent);
     remove(this.#loadingComponent);
     remove(this.#newPointEditComponent);
 
+    this.#tripInfoComponent = null;
     this.#sortComponent = null;
     this.#pointListComponent = null;
     this.#emptyPointListComponent = null;
@@ -236,4 +299,3 @@ export default class TripPresenter {
     this.rerender();
   };
 }
-
