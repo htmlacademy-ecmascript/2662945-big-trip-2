@@ -23,11 +23,13 @@ export default class TripPresenter {
   #tripInfoComponent = null;
   #currentSortType = SortType.DAY;
   #isLoading = true;
+  #headerContainer;
 
-  constructor({ eventsContainer, tripModel, filterModel }) {
+  constructor({ eventsContainer, tripModel, filterModel, tripMainContainer }) {
     this.#eventsContainer = eventsContainer;
     this.#tripModel = tripModel;
     this.#filterModel = filterModel;
+    this.#headerContainer = tripMainContainer;
   }
 
   init() {
@@ -134,7 +136,7 @@ export default class TripPresenter {
       price: this.#getTripPrice(points),
     });
 
-    render(this.#tripInfoComponent, this.#eventsContainer, RenderPosition.BEFOREBEGIN);
+    render(this.#tripInfoComponent, this.#headerContainer, RenderPosition.AFTERBEGIN);
   }
 
   #renderTrip() {

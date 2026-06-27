@@ -19,6 +19,7 @@ const tripPresenter = new TripPresenter({
   eventsContainer,
   tripModel,
   filterModel,
+  tripMainContainer,
 });
 
 const filterPresenter = new FilterPresenter({
