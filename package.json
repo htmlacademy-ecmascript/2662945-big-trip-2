@@ -31,6 +31,6 @@
   "dependencies": {
     "copy-webpack-plugin": "11.0.0",
     "dayjs": "1.11.7",
-    "flatpickr": "^4.6.13"
+    "flatpickr": "4.6.13"
   }
 }
