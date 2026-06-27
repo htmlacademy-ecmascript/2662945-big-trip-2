@@ -51,7 +51,7 @@ export const DURATION = {
   min: 20,
 };
 
-export const POINTS_COUNT = 10;
+export const POINTS_COUNT = 3;
 
 export const SortType = {
   DAY: 'sort-day',

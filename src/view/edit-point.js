@@ -204,7 +204,7 @@ export default class ViewEditPoint extends AbstractStatefulView {
                 name="event-price"
                 value="${basePrice}"
                 required
->
+              >
             </div>
 
             <button class="event__save-btn btn btn--blue" type="submit">Save</button>
@@ -230,7 +230,6 @@ export default class ViewEditPoint extends AbstractStatefulView {
     this.#dateToPicker?.destroy();
     this.#dateFromPicker = null;
     this.#dateToPicker = null;
-
     super.removeElement();
   }
 
@@ -273,7 +272,6 @@ export default class ViewEditPoint extends AbstractStatefulView {
     this.element.classList.add('shake');
     this.#setDisabledState(false);
     this.#resetButtonsText();
-
     this.element.addEventListener('animationend', this.#handleAnimationEnd, { once: true });
   }
 
@@ -300,16 +298,19 @@ export default class ViewEditPoint extends AbstractStatefulView {
     const { point, destinations } = this._state;
     const destinationInput = this.element.querySelector('.event__input--destination');
     const priceInput = this.element.querySelector('.event__input--price');
+    const selectedOfferInputs = this.element.querySelectorAll('.event__offer-checkbox:checked');
 
     const destination = destinations.find(
       (dest) => dest.name === destinationInput.value.trim()
     );
 
     const normalizedPrice = normalizePositiveInteger(priceInput.value);
-
-    priceInput.value = normalizedPrice;
-
     const basePrice = Number(normalizedPrice);
+
+    const selectedOffers = Array.from(selectedOfferInputs).map((input) => {
+      const offerId = input.id.replace('event-offer-', '').replace(`-${point.id}`, '');
+      return offerId;
+    });
 
     if (!destination) {
       destinationInput.setCustomValidity('Choose a city from the list');
@@ -330,6 +331,7 @@ export default class ViewEditPoint extends AbstractStatefulView {
       ...point,
       destination: destination.id,
       basePrice,
+      offers: selectedOffers,
     };
 
     await this.#onFormSubmit?.(updatedPoint);
@@ -387,7 +389,11 @@ export default class ViewEditPoint extends AbstractStatefulView {
 
   #setPriceInputHandler() {
     this.element.querySelector('.event__input--price').addEventListener('input', (evt) => {
-      evt.target.value = normalizePositiveInteger(evt.target.value);
+      const normalizedPrice = normalizePositiveInteger(evt.target.value);
+
+      evt.target.value = normalizedPrice;
+
+      this._state.point.basePrice = Number(normalizedPrice || 0);
     });
   }
 

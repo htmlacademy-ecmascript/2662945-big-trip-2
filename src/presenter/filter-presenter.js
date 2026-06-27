@@ -1,25 +1,44 @@
 import { render, remove } from '../framework/render.js';
 import ViewFilters from '../view/filters.js';
+import { filter } from '../utils/filter.js';
+import { FilterType } from '../mocks/const.js';
 
 export default class FilterPresenter {
   #filtersContainer = null;
   #filterModel = null;
+  #tripModel = null;
   #onFilterChange = null;
   #filtersComponent = null;
 
-  constructor({ filtersContainer, filterModel, onFilterChange }) {
+  constructor({ filtersContainer, filterModel, tripModel, onFilterChange }) {
     this.#filtersContainer = filtersContainer;
     this.#filterModel = filterModel;
+    this.#tripModel = tripModel;
     this.#onFilterChange = onFilterChange;
   }
 
   init() {
+    const points = this.#tripModel.points;
+
+    const disabledFilters = {
+      [FilterType.EVERYTHING]: points.length === 0,
+      [FilterType.FUTURE]: filter[FilterType.FUTURE](points).length === 0,
+      [FilterType.PRESENT]: filter[FilterType.PRESENT](points).length === 0,
+      [FilterType.PAST]: filter[FilterType.PAST](points).length === 0,
+    };
+
     this.#filtersComponent = new ViewFilters({
       currentFilterType: this.#filterModel.filter,
+      disabledFilters,
       onFilterTypeChange: this.#handleFilterTypeChange,
     });
 
     render(this.#filtersComponent, this.#filtersContainer);
+  }
+
+  rerender() {
+    remove(this.#filtersComponent);
+    this.init();
   }
 
   destroy() {

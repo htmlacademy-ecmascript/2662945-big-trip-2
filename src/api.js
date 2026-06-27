@@ -1,4 +1,4 @@
-const AUTHORIZATION = 'Basic YANA-BIG-TRIP2-2026-20-06';
+const AUTHORIZATION = `Basic ${Math.random().toString(36).slice(2)}`;
 const END_POINT = 'https://22.objects.htmlacademy.pro/big-trip';
 
 export default class ApiService {
