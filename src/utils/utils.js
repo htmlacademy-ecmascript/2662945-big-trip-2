@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { DURATION } from '../mocks/const.js';
+import { DURATION } from '../utils/const.js';
 
 export function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -33,4 +33,5 @@ export function normalizePositiveInteger(value) {
   const digits = String(value).replace(/\D/g, '');
   return digits.replace(/^0+/, '');
 }
+
 

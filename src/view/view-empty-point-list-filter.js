@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { FilterType } from '../mocks/const.js';
+import { FilterType } from '../utils/const.js';
 
 const EMPTY_MESSAGES = {
   [FilterType.EVERYTHING]: 'Click New Event to create your first point',
@@ -24,3 +24,4 @@ export default class ViewEmptyPointListFilter extends AbstractView {
     `;
   }
 }
+

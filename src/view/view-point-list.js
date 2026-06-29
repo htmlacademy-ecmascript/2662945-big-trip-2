@@ -5,3 +5,4 @@ export default class ViewPointList extends AbstractView {
     return '<ul class="trip-events__list"></ul>';
   }
 }
+

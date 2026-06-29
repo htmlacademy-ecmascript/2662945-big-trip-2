@@ -131,3 +131,4 @@ export default class ViewPoint extends AbstractView {
   }
 }
 
+

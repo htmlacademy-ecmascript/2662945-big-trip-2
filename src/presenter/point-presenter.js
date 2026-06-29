@@ -1,6 +1,6 @@
 import { render, replace, remove } from '../framework/render.js';
-import ViewPoint from '../view/point.js';
-import ViewEditPoint from '../view/edit-point.js';
+import ViewPoint from '../view/view-point.js';
+import ViewEditPoint from '../view/view-edit-point.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -37,8 +37,8 @@ export default class PointPresenter {
       offers: this.#offers,
     });
 
-    this.#pointComponent.setEditClickHandler(this.#handleEditClick);
-    this.#pointComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
+    this.#pointComponent.setEditClickHandler(this.#editClickHandler);
+    this.#pointComponent.setFavoriteClickHandler(this.#favoriteClickHandler);
 
     this.#editPointComponent = new ViewEditPoint({
       point: this.#point,
@@ -47,9 +47,9 @@ export default class PointPresenter {
       isCreating: false,
     });
 
-    this.#editPointComponent.setFormSubmitHandler(this.#handleFormSubmit);
-    this.#editPointComponent.setRollupClickHandler(this.#handleRollupClick);
-    this.#editPointComponent.setDeleteClickHandler(this.#handleDeleteClick);
+    this.#editPointComponent.setFormSubmitHandler(this.#formSubmitHandler);
+    this.#editPointComponent.setRollupClickHandler(this.#rollupClickHandler);
+    this.#editPointComponent.setDeleteClickHandler(this.#formDeleteClickHandler);
 
     if (prevPointComponent === null || prevEditPointComponent === null) {
       render(this.#pointComponent, this.#container);
@@ -71,7 +71,7 @@ export default class PointPresenter {
   destroy() {
     remove(this.#pointComponent);
     remove(this.#editPointComponent);
-    document.removeEventListener('keydown', this.#handleEscKeyDown);
+    document.removeEventListener('keydown', this.#documentKeydownHandler);
   }
 
   resetView() {
@@ -85,11 +85,11 @@ export default class PointPresenter {
     this.init();
   }
 
-  #handleEditClick = () => {
+  #editClickHandler = () => {
     this.#replaceCardToForm();
   };
 
-  #handleFavoriteClick = async () => {
+  #favoriteClickHandler = async () => {
     try {
       const updatedPoint = {
         ...this.#point,
@@ -99,15 +99,15 @@ export default class PointPresenter {
       const result = await this.#onDataChange(updatedPoint);
       this.update(result);
     } catch (error) {
-      this.#pointComponent?.shake?.();
+      this.#editPointComponent?.setAborting();
     }
   };
 
-  #handleRollupClick = () => {
+  #rollupClickHandler = () => {
     this.#replaceFormToCard();
   };
 
-  #handleDeleteClick = async () => {
+  #formDeleteClickHandler = async () => {
     try {
       this.#editPointComponent?.setDeleting();
       await this.#onDataChange(this.#point, 'delete');
@@ -116,7 +116,7 @@ export default class PointPresenter {
     }
   };
 
-  #handleFormSubmit = async (updatedPoint) => {
+  #formSubmitHandler = async (updatedPoint) => {
     try {
       this.#editPointComponent?.setSaving();
       const result = await this.#onDataChange(updatedPoint);
@@ -130,17 +130,17 @@ export default class PointPresenter {
   #replaceCardToForm() {
     this.#onModeChange();
     replace(this.#editPointComponent, this.#pointComponent);
-    document.addEventListener('keydown', this.#handleEscKeyDown);
+    document.addEventListener('keydown', this.#documentKeydownHandler);
     this.#mode = Mode.EDITING;
   }
 
   #replaceFormToCard() {
     replace(this.#pointComponent, this.#editPointComponent);
-    document.removeEventListener('keydown', this.#handleEscKeyDown);
+    document.removeEventListener('keydown', this.#documentKeydownHandler);
     this.#mode = Mode.DEFAULT;
   }
 
-  #handleEscKeyDown = (evt) => {
+  #documentKeydownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
       this.#replaceFormToCard();

@@ -1,13 +1,13 @@
 import { render, remove, RenderPosition } from '../framework/render.js';
-import ViewSort from '../view/sort.js';
-import { SortType, FilterType } from '../mocks/const.js';
+import ViewSort from '../view/view-sort.js';
+import { SortType, FilterType } from '../utils/const.js';
 import { sortPointByDay, sortPointByTime, sortPointByPrice } from '../utils/sort.js';
-import ViewPointList from '../view/point-list.js';
-import ViewEmptyPointListFilter from '../view/empty-point-list-filter.js';
-import ViewLoading from '../view/loading.js';
+import ViewPointList from '../view/view-point-list.js';
+import ViewEmptyPointListFilter from '../view/view-empty-point-list-filter.js';
+import ViewLoading from '../view/view-loading.js';
 import PointPresenter from './point-presenter.js';
-import ViewEditPoint from '../view/edit-point.js';
-import ViewTripInfo from '../view/trip-info.js';
+import ViewEditPoint from '../view/view-edit-point.js';
+import ViewTripInfo from '../view/view-trip-info.js';
 import { humanizeHeaderDate } from '../utils/point.js';
 
 export default class TripPresenter {
@@ -24,12 +24,16 @@ export default class TripPresenter {
   #currentSortType = SortType.DAY;
   #isLoading = true;
   #headerContainer;
+  #onNewPointDestroy = null;
+  #onFilterReset = null;
 
-  constructor({ eventsContainer, tripModel, filterModel, tripMainContainer }) {
+  constructor({ eventsContainer, tripModel, filterModel, tripMainContainer, onNewPointDestroy, onFilterReset }) {
     this.#eventsContainer = eventsContainer;
     this.#tripModel = tripModel;
     this.#filterModel = filterModel;
     this.#headerContainer = tripMainContainer;
+    this.#onNewPointDestroy = onNewPointDestroy;
+    this.#onFilterReset = onFilterReset;
   }
 
   init() {
@@ -52,6 +56,7 @@ export default class TripPresenter {
 
     this.#clearOpenedForms();
     this.#filterModel.setFilter(FilterType.EVERYTHING);
+    this.#onFilterReset?.();
     this.#currentSortType = SortType.DAY;
     this.rerender();
     this.#renderNewPointForm();
@@ -195,17 +200,14 @@ export default class TripPresenter {
   }
 
   #renderNewPointForm() {
-    const firstDestination = this.#tripModel.destinations[0];
-    const firstOfferType = this.#tripModel.offers[0]?.type ?? 'flight';
-
     this.#newPointEditComponent = new ViewEditPoint({
       point: {
         id: 'new-point',
-        type: firstOfferType,
-        destination: firstDestination?.id ?? '',
+        type: 'flight',
+        destination: '',
         basePrice: 0,
-        dateFrom: new Date().toISOString(),
-        dateTo: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        dateFrom: '',
+        dateTo: '',
         offers: [],
         isFavorite: false,
       },
@@ -214,7 +216,7 @@ export default class TripPresenter {
       isCreating: true,
     });
 
-    this.#newPointEditComponent.setFormSubmitHandler(this.#handleNewPointSubmit);
+    this.#newPointEditComponent.setFormSubmitHandler(this.#formSubmitHandler);
     this.#newPointEditComponent.setRollupClickHandler(this.#closeNewPointForm);
     this.#newPointEditComponent.setDeleteClickHandler(this.#closeNewPointForm);
 
@@ -224,13 +226,13 @@ export default class TripPresenter {
       RenderPosition.AFTERBEGIN
     );
 
-    document.addEventListener('keydown', this.#handleEscKeyDown);
+    document.addEventListener('keydown', this.#escapeKeydownHandler);
   }
 
   #renderSort() {
     this.#sortComponent = new ViewSort({
       currentSortType: this.#currentSortType,
-      onSortTypeChange: this.#handleSortTypeChange,
+      onSortTypeChange: this.#sortFormChangeHandler,
     });
 
     render(this.#sortComponent, this.#eventsContainer, RenderPosition.AFTERBEGIN);
@@ -250,8 +252,10 @@ export default class TripPresenter {
     remove(this.#pointListComponent);
     remove(this.#emptyPointListComponent);
     remove(this.#loadingComponent);
+    if (this.#newPointEditComponent) {
+      this.#onNewPointDestroy?.();
+    }
     remove(this.#newPointEditComponent);
-
     this.#tripInfoComponent = null;
     this.#sortComponent = null;
     this.#pointListComponent = null;
@@ -271,10 +275,12 @@ export default class TripPresenter {
   #closeNewPointForm = () => {
     remove(this.#newPointEditComponent);
     this.#newPointEditComponent = null;
-    document.removeEventListener('keydown', this.#handleEscKeyDown);
+    document.removeEventListener('keydown', this.#escapeKeydownHandler);
+
+    this.#onNewPointDestroy?.();
   };
 
-  #handleNewPointSubmit = async (newPoint) => {
+  #formSubmitHandler = async (newPoint) => {
     try {
       this.#newPointEditComponent?.setSaving();
       await this.#tripModel.addPointOnServer(newPoint);
@@ -285,14 +291,14 @@ export default class TripPresenter {
     }
   };
 
-  #handleEscKeyDown = (evt) => {
+  #escapeKeydownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
       this.#closeNewPointForm();
     }
   };
 
-  #handleSortTypeChange = (sortType) => {
+  #sortFormChangeHandler = (sortType) => {
     if (this.#currentSortType === sortType) {
       return;
     }
