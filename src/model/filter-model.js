@@ -1,4 +1,4 @@
-import { FilterType } from '../mocks/const.js';
+import { FilterType } from '../utils/const.js';
 
 export default class FilterModel {
   #filter = FilterType.EVERYTHING;
@@ -11,3 +11,4 @@ export default class FilterModel {
     this.#filter = filterType;
   }
 }
+

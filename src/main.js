@@ -1,11 +1,9 @@
-import TripPresenter from './presenter/presenterTrip.js';
+import TripPresenter from './presenter/trip-presenter.js';
 import FilterPresenter from './presenter/filter-presenter.js';
 import TripModel from './model/trip-model.js';
 import FilterModel from './model/filter-model.js';
-import ApiService from './api.js';
-import ViewNewPointButton from './view/new-point-button.js';
-import ViewLoading from './view/loading.js';
-import { render, remove, RenderPosition } from './framework/render.js';
+import ApiService from './api-service.js';
+import ViewNewPointButton from './view/view-new-point-button.js';
 
 const filtersContainer = document.querySelector('.trip-controls__filters');
 const eventsContainer = document.querySelector('.trip-events');
@@ -15,14 +13,23 @@ const api = new ApiService();
 const tripModel = new TripModel(api);
 const filterModel = new FilterModel();
 
-const tripPresenter = new TripPresenter({
-  eventsContainer,
-  tripModel,
-  filterModel,
-  tripMainContainer,
+let filterPresenter = null;
+let tripPresenter = null;
+
+const newPointButton = new ViewNewPointButton({
+  onClick: buttonClickHandler,
 });
 
-const filterPresenter = new FilterPresenter({
+function buttonClickHandler() {
+  newPointButton.setDisabled(true);
+  tripPresenter.createPoint();
+}
+
+function newPointDestroyHandler() {
+  newPointButton.setDisabled(false);
+}
+
+filterPresenter = new FilterPresenter({
   filtersContainer,
   filterModel,
   tripModel,
@@ -32,24 +39,27 @@ const filterPresenter = new FilterPresenter({
   },
 });
 
-const loadingComponent = new ViewLoading();
-render(loadingComponent, eventsContainer, RenderPosition.BEFOREEND);
-
-const newPointButton = new ViewNewPointButton({
-  onClick: () => tripPresenter.createPoint(),
+tripPresenter = new TripPresenter({
+  eventsContainer,
+  tripModel,
+  filterModel,
+  tripMainContainer,
+  onNewPointDestroy: newPointDestroyHandler,
+  onFilterReset: () => filterPresenter.rerender(),
 });
-render(newPointButton, tripMainContainer, RenderPosition.BEFOREEND);
+
+tripMainContainer.append(newPointButton.element);
+
+tripPresenter.init();
 
 (async () => {
   try {
     await tripModel.init();
   } catch (error) {
-    loadingComponent.element.textContent = 'Failed to load latest route information';
-    return;
+    // пустое состояние
+  } finally {
+    tripPresenter.setLoadingFinished();
+    tripPresenter.rerender();
+    filterPresenter.init();
   }
-
-  remove(loadingComponent);
-  tripPresenter.setLoadingFinished();
-  tripPresenter.init();
-  filterPresenter.init();
 })();

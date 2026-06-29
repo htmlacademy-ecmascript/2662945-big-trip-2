@@ -75,14 +75,14 @@ export default class ViewFilters extends AbstractView {
     const element = super.element;
 
     if (!this.#isListenersAdded) {
-      element.addEventListener('change', this.#handleChange);
+      element.addEventListener('change', this.#filtersChangeHandler);
       this.#isListenersAdded = true;
     }
 
     return element;
   }
 
-  #handleChange = (evt) => {
+  #filtersChangeHandler = (evt) => {
     const input = evt.target.closest('.trip-filters__filter-input');
 
     if (!input || input.disabled) {
@@ -92,3 +92,4 @@ export default class ViewFilters extends AbstractView {
     this.#onFilterTypeChange?.(input.value);
   };
 }
+

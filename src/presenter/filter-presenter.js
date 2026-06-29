@@ -1,7 +1,7 @@
 import { render, remove } from '../framework/render.js';
-import ViewFilters from '../view/filters.js';
+import ViewFilters from '../view/view-filters.js';
 import { filter } from '../utils/filter.js';
-import { FilterType } from '../mocks/const.js';
+import { FilterType } from '../utils/const.js';
 
 export default class FilterPresenter {
   #filtersContainer = null;
@@ -30,7 +30,7 @@ export default class FilterPresenter {
     this.#filtersComponent = new ViewFilters({
       currentFilterType: this.#filterModel.filter,
       disabledFilters,
-      onFilterTypeChange: this.#handleFilterTypeChange,
+      onFilterTypeChange: this.#filtersFormChangeHandler,
     });
 
     render(this.#filtersComponent, this.#filtersContainer);
@@ -46,7 +46,7 @@ export default class FilterPresenter {
     this.#filtersComponent = null;
   }
 
-  #handleFilterTypeChange = (filterType) => {
+  #filtersFormChangeHandler = (filterType) => {
     if (this.#filterModel.filter === filterType) {
       return;
     }
@@ -55,3 +55,4 @@ export default class FilterPresenter {
     this.#onFilterChange?.();
   };
 }
+

@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { SortType } from '../mocks/const.js';
+import { SortType } from '../utils/const.js';
 
 export default class ViewSort extends AbstractView {
   #currentSortType = SortType.DAY;
@@ -85,14 +85,14 @@ export default class ViewSort extends AbstractView {
     const element = super.element;
 
     if (!this.#isListenersAdded) {
-      element.addEventListener('change', this.#sortTypeChangeHandler);
+      element.addEventListener('change', this.#sortChangeHandler);
       this.#isListenersAdded = true;
     }
 
     return element;
   }
 
-  #sortTypeChangeHandler = (evt) => {
+  #sortChangeHandler = (evt) => {
     const input = evt.target.closest('.trip-sort__input');
 
     if (!input || input.disabled) {
@@ -108,3 +108,4 @@ export default class ViewSort extends AbstractView {
     this.#onSortTypeChange?.(sortType);
   };
 }
+

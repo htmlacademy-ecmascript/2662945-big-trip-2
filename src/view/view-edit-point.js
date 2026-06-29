@@ -1,7 +1,7 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { TYPES } from '../mocks/const.js';
+import { TYPES } from '../utils/const.js';
 import { humanizeEditEventDate } from '../utils/point.js';
 import { normalizePositiveInteger } from '../utils/utils.js';
 
@@ -245,17 +245,17 @@ export default class ViewEditPoint extends AbstractStatefulView {
 
   setFormSubmitHandler(callback) {
     this.#onFormSubmit = callback;
-    this.element.querySelector('form').addEventListener('submit', this.#handleSubmit);
+    this.element.querySelector('form').addEventListener('submit', this.#FormSubmitHandler);
   }
 
   setRollupClickHandler(callback) {
     this.#onRollupClick = callback;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleRollupClick);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#RollupButtonClickHandler);
   }
 
   setDeleteClickHandler(callback) {
     this.#onDeleteClick = callback;
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#handleDeleteClick);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#DeleteButtonClickHandler);
   }
 
   setSaving() {
@@ -292,7 +292,7 @@ export default class ViewEditPoint extends AbstractStatefulView {
     deleteButton.disabled = isDisabled;
   }
 
-  #handleSubmit = async (evt) => {
+  #FormSubmitHandler = async (evt) => {
     evt.preventDefault();
 
     const { point, destinations } = this._state;
@@ -337,12 +337,12 @@ export default class ViewEditPoint extends AbstractStatefulView {
     await this.#onFormSubmit?.(updatedPoint);
   };
 
-  #handleRollupClick = (evt) => {
+  #RollupButtonClickHandler = (evt) => {
     evt.preventDefault();
     this.#onRollupClick?.();
   };
 
-  #handleDeleteClick = (evt) => {
+  #DeleteButtonClickHandler = (evt) => {
     evt.preventDefault();
     this.#onDeleteClick?.();
   };
@@ -430,3 +430,4 @@ export default class ViewEditPoint extends AbstractStatefulView {
     });
   }
 }
+
